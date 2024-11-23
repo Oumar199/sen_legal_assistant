@@ -1,0 +1,35 @@
+Flask==3.0.3
+Flask-Session==0.5.0
+Flask-SQLAlchemy==3.0.2
+# torch==2.0.0+cu117
+# torchvision==0.15.0
+# torchaudio==2.0.0
+langchain==0.2.0
+langchain-community==0.2.0
+langchain-core==0.2.10
+langchain-openai==0.1.7
+langchain-pinecone==0.1.1
+langchain-cohere
+langchain-groq
+langchain-mistralai
+langchain-huggingface
+sentence-transformers
+transformers
+datasets
+langchain-chroma==0.1.1
+langchainhub
+langgraph==0.1.1
+pinecone==3.2.2
+faiss-cpu
+rank_bm25
+colorama
+mysql-connector-python
+pandas
+Pillow
+regex
+requests
+SQLAlchemy
+stqdm
+tqdm
+gunicorn
+
