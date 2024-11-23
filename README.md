@@ -1,4 +1,4 @@
-# DETECT FAKE FACE WITH VISION TRANSFORMER
+# SEN LEGAL ASSISTANT OVERVIEW
 -------------------------
 <p align = "justify">
 
@@ -10,7 +10,7 @@ Deepfake has recently been used in the media to create false information that ap
 
 
 
-<span style = "background-color: white"><img src = "[https://miro.medium.com/max/828/1*qFzKC1GqOR17XaiQBex83w.webp](https://media.giphy.com/media/ATsWtUsuuFRfq8OhZ7/source.gif)"></span>
+<span style = "background-color: white"><img src = ""></span>
 
 ![VISION_TRANSFORMER](https://cdn.analyticsvidhya.com/wp-content/uploads/2021/03/vit.gif)
 ![VISION_TRANSFORMER](https://ghost.graviti.com/content/images/size/w1000/2022/02/image-1.png)
