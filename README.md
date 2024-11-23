@@ -23,18 +23,18 @@ This project explores the feasibility and implications of creating an artificial
 ![trocr_legal](https://github.com/user-attachments/assets/ae7d1ee0-9a6b-4eb7-9074-00af41573ee3)
 
 <!-- <p style="text-align: justify"> -->
-In this project, we use Deep Neural Networks to identify which image is fake or real. The training will be done on a dataset that we got from Kaggle (check it here <a href="https://www.kaggle.com/datasets/ciplab/real-and-fake-face-detection?resource=download)">kaggle_real_fake_faces</a>) created by $\color{darkorange}Seonghyeon \space Nam,\space Seoung \space Wug \space Oh,\space et\space al.$ They used expert knowledge to photoshop authentic images. The fake images range between easy, medium, or hard to recognize. The modifications are made on the eyes, nose, and mouth (which permit human beings to recognize others) or the whole face.
+<!-- In this project, we use Deep Neural Networks to identify which image is fake or real. The training will be done on a dataset that we got from Kaggle (check it here <a href="https://www.kaggle.com/datasets/ciplab/real-and-fake-face-detection?resource=download)">kaggle_real_fake_faces</a>) created by $\color{darkorange}Seonghyeon \space Nam,\space Seoung \space Wug \space Oh,\space et\space al.$ They used expert knowledge to photoshop authentic images. The fake images range between easy, medium, or hard to recognize. The modifications are made on the eyes, nose, and mouth (which permit human beings to recognize others) or the whole face. -->
 <!-- </p> -->
 
-![fake_photoshop](https://github.com/minostauros/Real-and-Fake-Face-Detection/raw/master/filename_description.jpg)
+<!-- ![fake_photoshop](https://github.com/minostauros/Real-and-Fake-Face-Detection/raw/master/filename_description.jpg) -->
 
-The image above is described as a fake image file. The name of the file can be decomposed into three different parts separated by underscores:
+<!-- The image above is described as a fake image file. The name of the file can be decomposed into three different parts separated by underscores:
 
 - The first part indicates the quality of the Photoshop or the difficulty of recognizing that it is fake;
 - The second part indicates the identification number of the image;
-- The third and final part indicates the modified segment of the face in binary digits with the following signature -> $\color{orange}[left\\_eye\\_bit,\space right\\_eye\\_bit,\space nose\\_bit,\space mouth\\_bit]$. The segment is modified if it is the positive bit (1). Otherwise, the segment is not modified. 
+- The third and final part indicates the modified segment of the face in binary digits with the following signature -> $\color{orange}[left\\_eye\\_bit,\space right\\_eye\\_bit,\space nose\\_bit,\space mouth\\_bit]$. The segment is modified if it is the positive bit (1). Otherwise, the segment is not modified.  -->
 
-### Installing
+<!-- ### Installing
 
 The `fake_face_detection` package contains functions and classes used for making exploration, pre-processing, visualization, training, searching for the best model, etc. It is available, and you install it with the following steps:
 
@@ -66,13 +66,13 @@ $ pip install -e fake-face-detection
 - You can deactivate the environment if you finish:
 ```console
 $ deactivate
-``` 
+```  -->
 
-### Tutorial
+<!-- ### Tutorial
 
-A tutorial explaining how each package part was create is available in `readthedocs` and `github`. Click on the following link to access it $\longrightarrow$ [Tutorial](https://oumar199.github.io/fake_real_face_detection_docs/).
+A tutorial explaining how each package part was create is available in `readthedocs` and `github`. Click on the following link to access it $\longrightarrow$ [Tutorial](https://oumar199.github.io/fake_real_face_detection_docs/). -->
 
-### Example of usage
+<!-- ### Example of usage
 
 After installing the package, you can test it by creating a Python file named $\color{orange}optimization.py$ and add the following code inside the file to optimize the parameters of your objective function:
 ```python
@@ -101,7 +101,7 @@ print(results.head(50))
 To execute the file, write the following command in the console of your terminal:
 ```console
 python<version> optimization.py
-```
+``` -->
 
 ### Citation
 ```bibtex
