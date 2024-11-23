@@ -8,9 +8,17 @@ Deepfake has recently been used in the media to create false information that ap
  However, our project uses `Vision Transformer` and `Transfer Learning` to detect false faces like those generated on this site [ThisPersonDoesNotExist](https://this-person-does-not-exist.com/en). The model is trained on some images obtained from Kaggle and is available at the following link [KaggleFakeFace](https://www.kaggle.com/datasets/ciplab/real-and-fake-face-detection?resource=download).
 
 
+## RAG System
 
+![rag_system](https://github.com/user-attachments/assets/688f7dcd-b36d-47a1-8a1c-5268bd2e6e8e)
 
-<span style = "background-color: white"><img src = ""></span>
+## Agent System
+
+![agent_system](https://github.com/user-attachments/assets/edc79362-1e8f-46c3-b7d4-4b2fd98538eb)
+
+## TrOCR for legal documents
+
+![trocr_legal](https://github.com/user-attachments/assets/ae7d1ee0-9a6b-4eb7-9074-00af41573ee3)
 
 ![VISION_TRANSFORMER](https://cdn.analyticsvidhya.com/wp-content/uploads/2021/03/vit.gif)
 ![VISION_TRANSFORMER](https://ghost.graviti.com/content/images/size/w1000/2022/02/image-1.png)
@@ -102,10 +110,10 @@ python<version> optimization.py
 
 ### Citation
 ```bibtex
-@misc{ok2023fakedetect,
-  title={Fake and Real Face Detection},
+@misc{ok2024senlegalassistant,
+  title={Sen Legal Assistant},
   author={Oumar Kane},
   howpublished={https://github.com/Oumar199/fake_face_detection_ViT},
-  year={2023}
+  year={2024}
 }
 ```
