@@ -12,15 +12,15 @@ This project explores the feasibility and implications of creating an artificial
 
 ### RAG System
 
-![rag_system](https://github.com/user-attachments/assets/688f7dcd-b36d-47a1-8a1c-5268bd2e6e8e)
+![rag_system](https://github.com/user-attachments/assets/d7519554-c2dc-42c5-82ff-fd91b1e3d739)
 
 ### Agent System
 
-![agent_system](https://github.com/user-attachments/assets/edc79362-1e8f-46c3-b7d4-4b2fd98538eb)
+![agent_system](https://github.com/user-attachments/assets/e6ffeb8e-9acb-4cae-a456-6303792a6750)
 
 ### TrOCR for legal documents
 
-![trocr_legal](https://github.com/user-attachments/assets/ae7d1ee0-9a6b-4eb7-9074-00af41573ee3)
+![trocr_legal](https://github.com/user-attachments/assets/7760ef0d-afbc-4373-839a-bf310036480b)
 
 <!-- <p style="text-align: justify"> -->
 <!-- In this project, we use Deep Neural Networks to identify which image is fake or real. The training will be done on a dataset that we got from Kaggle (check it here <a href="https://www.kaggle.com/datasets/ciplab/real-and-fake-face-detection?resource=download)">kaggle_real_fake_faces</a>) created by $\color{darkorange}Seonghyeon \space Nam,\space Seoung \space Wug \space Oh,\space et\space al.$ They used expert knowledge to photoshop authentic images. The fake images range between easy, medium, or hard to recognize. The modifications are made on the eyes, nose, and mouth (which permit human beings to recognize others) or the whole face. -->
