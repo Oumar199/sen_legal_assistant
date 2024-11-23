@@ -1,4 +1,4 @@
-# SEN LEGAL ASSISTANT OVERVIEW
+# SEN LEGAL ASSISTANT 
 -------------------------
 
 ## Context
