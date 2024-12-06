@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<section class="py-5">
+    <div class="container py-4 py-xl-5">
+        <form>
+            <div class="card text-center">
+                <div class="card-header text-primary" style="background: #1d4350;padding: 2rem;"><span class="text-uppercase fs-3" style="font-size: 20px;font-weight: bold;color: var(--bs-body-bg);">Transformation de scan en texte</span></div>
+                <div class="card-body border-1" style="border-style: solid;border-color: #1d4350;border-top: 0px none rgb(45, 45, 45);">
+                    <div class="w-100" style="position: relative;height: 1px;"><i class="fas fa-images icon" style="font-size: 35px;position: absolute;top: -4500%;left:-3.6%;color: #1d4350;background: var(--bs-body-bg);border-style: solid;padding: 0.4rem;border-radius: 20px;"></i></div>
+                    <p class="fs-5 card-text" style="font-weight: bold;color: rgb(29,67,80);">Sélectionnez les scans</p><input id="formFileMultiple" class="form-control form-control form-control" type="file" multiple />
+                    <div class="text-center">
+                        <div class="row" style="text-align: center;">
+                            <div class="col-md-3 offset-md-3"><a class="btn btn-primary" role="button" href="#">Extraire</a></div>
+                            <div class="col-md-3"><button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#exampleModalLong">Paramètres</button></div>
+                        </div>
+                    </div>
+                    <div id="exampleModalLong" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 id="exampleModalLongTitle" class="modal-title">Paramètres</h5><button class="close" aria-label="Close" data-bs-dismiss="modal" style="margin-left: 20rem;" type="button"><span aria-hidden="true">×</span></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-row">
+                                        <div class="col-md-6 form-group"><label for="temperature">Température</label><input id="temperature" class="form-control form-control form-control" type="number" max="1" min=".01" name="temperature" placeholder="Température" step=".01" value="0.5" /></div>
+                                        <div class="col-md-6 form-group"><input class="form-control form-control form-control" type="number" max="15" min="2" placeholder="N Récupérations" value="3" /></div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer"><button class="btn btn-danger" data-bs-dismiss="modal" style="margin-right: 10rem;" type="button">Fermer</button><button class="btn btn-primary" type="button">Sauvegarder</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body border-1" style="position: relative;border-style: solid;border-color: #a43931;border-top: 0px none rgb(45, 45, 45);">
+                    <div class="w-100" style="position: relative;height: 1px;"><svg class="bi bi-layer-forward icon" xmlns="http://www.w3.org/2000/svg" width="1.7em" height="1.5em" fill="currentColor" viewBox="0 0 16 16" style="font-size: 35px;position: absolute;top: -4500%;left: -3.6%;color: rgb(164,57,49);background: var(--bs-body-bg);border-style: solid;padding: 0.4rem;border-radius: 20px;">
+                            <path d="M8.354.146a.5.5 0 0 0-.708 0l-3 3a.5.5 0 0 0 0 .708l1 1a.5.5 0 0 0 .708 0L7 4.207V12H1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H9V4.207l.646.647a.5.5 0 0 0 .708 0l1-1a.5.5 0 0 0 0-.708l-3-3z"></path>
+                            <path d="M1 7a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4.5a.5.5 0 0 0 0-1H1V8h4.5a.5.5 0 0 0 0-1zm9.5 0a.5.5 0 0 0 0 1H15v2h-4.5a.5.5 0 0 0 0 1H15a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z"></path>
+                        </svg></div>
+                    <p class="fs-5 card-text" style="font-weight: bold;color: rgb(164,57,49);border-color: rgb(164,57,49);">Réponse du système</p>
+                    <p class="card-text" style="color: rgb(15,32,39);">La réponse sera fournie ici ...</p>
+                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+                    <p class="card-text"></p><a class="btn btn-primary" role="button" href="#">Télécharger</a><img class="card-img w-100 d-block card-img-bottom w-100 card-img-bottom w-100 card-img-top w-100 card-img-bottom" src="Decret-No-87-271-105.jpg" alt="Card image cap" />
+                    <div class="text-primary d-none visible spinner-border" role="status" style="width: 60px;height: 60px;border-width: 10px;"><span class="sr-only">Loading...</span></div>
+                </div>
+            </div>
+            
+        </form>
+    </div>
+</section>
+
+{% endblock content %}

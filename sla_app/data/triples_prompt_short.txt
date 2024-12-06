@@ -1,0 +1,89 @@
+You are a networked intelligence helping a human track knowledge triples from legal texts about all relevant legal objects, things, concepts, etc. and integrating them with your knowledge stored within your weights as well as that stored in a knowledge graph. Extract all knowledge triples from the text. A knowledge triple is a clause that contains a subject, a predicate, and an object. The subject is the entity being described, the predicate is the property of the subject that is being described, and the object is the value of the property. Don't duplicate triples. We are mostly interested by the parts article actuel, fait référence à, etc Use ... for consecutive range of numbers, numbers in place of ordinal numbers, and don't add R(.) or L(.) before article numbers. Let's think step by step to correctly provide more references from the legal documents.
+
+EXAMPLE
+Contenu de l'article numéro 106 du décret 2009-1450 : Toute démolition d’immeubles compris dans un secteur sauvegardé est soumise à autorisation administrative préalable délivrée par le Ministre chargé de l’Urbanisme, après accord du Ministre chargé des Monuments et Sites historiques, conformément à l’article 79, à l’alinéa 5 de la loi n°2008-43 du 20 août 2008 portant partie législative du présent Code.
+Références : Code juridique = Foncier et Domanial; Date de signature = 2009-12-30; Déclaration universelle des droits de l'homme et du citoyen = non; Loi = 2008-43; Décret = 2009-1450; Livre = LIVRE I. - DISPOSITIONS GENERALES ET REGLES DE PLANIFICATION URBAINE; Titre = TITRE III. - LES OPERATIONS D’AMENAGEMENT; Chapitre = CHAPITRE III. - SECTEURS SAUVEGARDES ET RESTAURATION IMMOBILIERE; Section = SECTION I. - SECTION SAUVEGARDES; Section d'application = réglementaire; Barêmes des prix des loyer = non;
+Références extraites : article = ['article 79'], loi = ['la loi n°2008-43 du 20 août 2008'], code = ['partie législative du présent Code'], decret = [], arrete = [], declaration = [], partie = [], livre = [], titre = [], chapitre = [], section = [], sous_section = [], paragraphe = [], alinea = ['alinéa 5']
+
+Output: (l'article actuel, correspond à, article 106 du décret 2009-1450)<|>
+(l'article actuel, fait référence à, article 79 de la loi 2008-43)<|>
+(l'article actuel, fait référence à, alinéa 5 de article 79 de la loi 2008-43)
+END OF EXAMPLE
+
+EXAMPLE
+Contenu de l'article numéro 113 du décret 2009-1450 : Les travaux de restauration sont réalisés conformément aux règles en vigueur pour la préservation des immeubles présentant un intérêt historique esthétique ou culturel, notamment la loi n°71-12 du 25 janvier 1971 fixant le régime des monuments historiques et son décret d’application n°73-746 du 8 août 1973 ainsi que toute règlementation subséquente.
+Références : Code juridique = Foncier et Domanial; Date de signature = 2009-12-30; Déclaration universelle des droits de l'homme et du citoyen = non; Loi = 2008-43; Décret = 2009-1450; Livre = LIVRE I. - DISPOSITIONS GENERALES ET REGLES DE PLANIFICATION URBAINE; Titre = TITRE III. - LES OPERATIONS D’AMENAGEMENT; Chapitre = CHAPITRE III. - SECTEURS SAUVEGARDES ET RESTAURATION IMMOBILIERE; Section = SECTION II. - LA RESTAURATION IMMOBILIERE; Section d'application = réglementaire; Barêmes des prix des loyer = non;
+Références extraites : article = [], loi = ['loi n°71-12 du 25 janvier 1971'], code = [], decret = ['décret d’application n°73-746 du 8 août 1973'], arrete = [], declaration = [], partie = [], livre = [], titre = [], chapitre = [], section = [], sous_section = [], paragraphe = [], alinea = []
+
+Output: (l'article actuel, correspond à, article 113 du décret 2009-1450)<|>
+(l'article actuel, fait référence à, loi 71-12)<|>
+(l'article actuel, fait référence à, décret 73-746)
+END OF EXAMPLE
+
+EXAMPLE
+Contenu de l'article numéro 304 du décret 2009-1450 : Le présent chapitre a pour objet d’assurer la sécurité contre les risques d’incendie et de panique dans les établissements recevant du public. Les conditions imposées dépendent du nombre de personnes admises dans l’établissement, de la nature de son exploitation, de ses dimensions, de son installation et du mode de construction des bâtiments.
+Elles font l’objet d’un règlement de sécurité établi par l’arrête n°5945 du 14 mai 1969 instituant les règles de sécurité contre les risques d’incendie et de paniques dans les établissements recevant du public.
+Ce règlement comprend des dispositions générales communes et des dispositions particulières propres à chaque type d’établissement.
+Les mesures prescrites sont applicables, sous réserves des dispositions formulées à la section III, à tous les établissements dans lesquels l’effectif public, tel que défini aux articles R 305 et R 306 ci-après, atteint le chiffre indiqué pour chaque type d’exploitation par le règlement y afférent.
+Références : Code juridique = Foncier et Domanial; Date de signature = 2009-12-30; Déclaration universelle des droits de l'homme et du citoyen = non; Loi = 2008-43; Décret = 2009-1450; Livre = LIVRE II. - REGLES RELATIVES A L’ACTE DE CONSTRUCTION; Titre = TITRE II. - DE L’AUTORISATION DE CONSTRUIRE; Sous-Titre = SOUS_TITRE IV. - PRESCRIPTIONS SPECIALES IMPOSEES AUX ETABLISSEMENTS RECEVANT DU PUBLIC, AUX IMMEUBLES DE GRANDE HAUTEUR, AUX ETABLISSEMENTS A CARACTERE INDUSTRIEL ET AUX ETABLISSEMENTS CLASSES; Chapitre = CHAPITRE PREMIER. - ETABLISSEMENTS RECEVANT DU PUBLIC; Section = SECTION I. - DISPOSITIONS GENERALES; Section d'application = réglementaire; Barêmes des prix des loyer = non;
+Références extraites : article = ['R 305', 'R 306'], loi = [], code = [], decret = [], arrete = ['n°5945 du 14 mai 1969'], declaration = [], partie = [], livre = [], titre = [], chapitre = [], section = ['III'], sous_section = [], paragraphe = [], alinea = []
+
+Output: (l'article actuel, correspond à, article 304 du décret 2009-1450)<|>
+(l'article actuel, fait référence à, arrêté 5945)<|>
+(l'article actuel, fait référence à, section 3 du décret 2009-1450)<|>
+(l'article actuel, fait référence à, article 305, 306 du décret 2009-1450)
+END OF EXAMPLE
+
+EXAMPLE
+Contenu de l'article numéro 131 de la loi 2009-23 : Tout contrat ayant pour objet le transfert de propriété d’un immeuble ou d’une partie d’immeuble ou d’une partie d’immeuble à usage d’habitation ou à usage professionnel et d’habitation et comportant l’obligation pour l’acheteur d’effectuer des versements ou des dépôts de fonds avant l’achèvement de la construction doit, à peine de nullité, être conforme aux dispositions des articles L 132 à L 135.
+Celui qui s’oblige à édifier ou à faire édifier un immeuble ou une partie d’immeuble à usage d’habitation ou à usage professionnel et d’habitation, lorsqu’il procure directement ou indirectement le terrain ou le droit de construire sur le terrain à celui qui contracte l’obligation d’effectuer les versements ou les dépôts ci-dessus définis, doit conclure un contrat conforme aux dispositions de l’alinéa précédent, sauf si le terrain ou le droit est procuré à une société régie par les chapitres 1er, II (section I et II) et III du titre 1erdu présent livre, ou si celui qui les procure est un organisme d’habitations à loyer modéré agissant comme prestataire de service.
+Le contrat de vente d’immeuble à construire conclu par un organisme d’habitations à loyer modéré, par une société civile immobilière constituée entre deux ou plusieurs organismes d’habitations à loyer modéré, ou par une société d’économie mixte dont le capital appartient pour plus de la moitié à une personne de droit public peut, par dérogation aux dispositions de l’article L 123 et de l’article L 133 :
+stipuler que le transfert de propriété résulte de la constatation du paiement intégral du prix;
+prévoir que le prix est payable entre les mains du vendeur par fractions échelonnées tant avant qu’après achèvement de la construction.
+Références : Code juridique = Foncier et Domanial; Date de signature = 2009-07-08; Déclaration universelle des droits de l'homme et du citoyen = non; Loi = 2009-23; Livre = LIVRE II : DISPOSITIONS RELATIVES AUX CONSTRUCTEURS; Titre = TITRE VI : DES VENTES D’IMMEUBLES À CONSTRUIRE; Section d'application = législative; Barêmes des prix des loyer = non;
+Références extraites : article = ['L 132 à L 135', 'L 123', 'L 133'], loi = [], code = [], decret = [], arrete = [], declaration = [], partie = [], livre = ['présent'], titre = ['1er'], chapitre = ['1er', 'II'], section = ['I', 'II'], sous_section = [], paragraphe = [], alinea = ['précédent']
+
+Output: (l'article actuel, correspond à, article 131 de la loi 2009-23)<|>
+(l'article actuel, fait référence à, article 123, 132, ..., 135 de la loi 2009-23)<|>
+(l'article actuel, fait référence à, chapitre 1 du titre 1 du livre 2 de la loi 2009-23)<|>
+(l'article actuel, fait référence à, section 1, 2 du chapitre 2 du titre 1 du livre 2 de la loi 2009-23)<|>,
+(l'article actuel, fait référence à, chapitre 3 du titre 1 du livre 2 de la loi 2009-23
+END OF EXAMPLE
+
+EXAMPLE
+Contenu de l'article numéro 342 du décret 2009-1450 : Les compartiments prévus à l’article R 338 et suivants ont la hauteur d’un niveau, une longueur n’excédant pas 75 mètres et une surface au plus égale à 2500 mètres carrés.
+Les compartiments peuvent comprendre deux niveaux si la superficie de chacun est limitée à 1250 mètres carrés et trois niveaux, pour la même superficie, quand l’un d’eux est accessible aux engins des services publics de secours et de lutte contre l’incendie.
+Les parois de ces compartiments, y compris les dispositions tels que ses portes permettant l’accès aux escaliers et aux ascenseurs et monte-charges et entre compartiments, doivent être coupe-feu de degré deux heures.
+Références : Code juridique = Foncier et Domanial; Date de signature = 2009-12-30; Déclaration universelle des droits de l'homme et du citoyen = non; Loi = 2008-43; Décret = 2009-1450; Livre = LIVRE II. - REGLES RELATIVES A L’ACTE DE CONSTRUCTION; Titre = TITRE II. - DE L’AUTORISATION DE CONSTRUIRE; Sous-Titre = SOUS_TITRE IV. - PRESCRIPTIONS SPECIALES IMPOSEES AUX ETABLISSEMENTS RECEVANT DU PUBLIC, AUX IMMEUBLES DE GRANDE HAUTEUR, AUX ETABLISSEMENTS A CARACTERE INDUSTRIEL ET AUX ETABLISSEMENTS CLASSES; Chapitre = CHAPITRE II. - LES IMMEUBLES DE GRANDE HAUTEUR (I.G.H.); Section = SECTION II. - EMPLACEMENT, CONDITIONS D’UTILISATION, PRINCIPES DE SECURITE; Section d'application = réglementaire; Barêmes des prix des loyer = non;
+Références extraites : article = ['R 338'], loi = [], code = [], decret = [], arrete = [], declaration = [], partie = [], livre = [], titre = [], chapitre = [], section = [], sous_section = [], paragraphe = [], alinea = []
+
+Output: (l'article actuel, correspond à, article 342 du décret 2009-1450)<|>
+(l'article actuel, fait référence à, article 338, ... du décret 2009-1450
+END OF EXAMPLE
+
+EXAMPLE
+Contenu de l'article numéro 2 du décret 64-574 : Pour les terrains visés à l’article précédent, la mise en valeur prévue à l’article 3 de la loi précitée doit consister exclusivement en constructions complètement terminées. Sous réserves des dispositions de l’article 3 ci-après, ces constructions doivent présenter les caractéristiques minimes suivantes :
+-    maison ou bâtiment construit sur un terrain d’au moins cent cinquante (150) mètres carrés, en bon état d’entretien, de construction durable, comportant une étanchéité et une finition satisfaisantes, offrant un confort minimum et des installations sanitaires sommaires.
+Références : Code juridique = Foncier et Domanial; Domaine = national; Date de signature = 1964-07-30; Déclaration universelle des droits de l'homme et du citoyen = non; Loi = 64-46; Décret = 64-574; Chapitre = CHAPITRE PREMIER. - CONDITIONS DE MISE EN VALEUR APPLICABLES DANS LES ZONES URBAINES; Section = Section première. - Terrains à bâtir; Barêmes des prix des loyer = non;
+Références extraites : article = ['l’article précédent', 'l’article 3 de la loi précitée', 'l’article 3 ci-après'], loi = ['la loi précitée'], code = [], decret = [], arrete = [], declaration = [], partie = [], livre = [], titre = [], chapitre = [], section = [], sous_section = [], paragraphe = [], alinea = []
+
+Output: (l'article actuel, correspond à, article 2 du décret 64-574)<|>
+(l'article actuel, fait référence à, l'article précédent)<|>
+(l'article précédent, correspond à, article 1 du décret 64-574)<|>
+(l'article actuel, fait référence à, article 1 du décret 64-574)<|>
+(l'article actuel, fait référence à, article 3 de loi précitée)<|>
+(la loi précitée, correspond à, loi 64-46)<|>
+(la loi actuel, fait référence à, article 3 de la loi 64-46)<|>
+(l'article actuel, fait référence à, article 3 du décret 64-574)
+END OF EXAMPLE
+
+EXAMPLE
+Contenu de l'article numéro 42 de la loi 76-66 : Les immeubles non affectés consistant en terrains portant des constructions, installations ou aménagements, peuvent faire l’objet d’autorisations d’occuper à titre précaire et révocable, de baux ordinaires, de baux emphytéotiques, de concessions de droit de superficie, celles-ci pouvant comporter la vente des constructions installations ou aménagements existants, dans des conditions qui seront déterminées par décret. La propriété ne peut en être transférée qu’en vertu d’une loi.
+Références : Code juridique = Foncier et Domanial; Domaine = etat; Date de signature = 1976-07-02; Déclaration universelle des droits de l'homme et du citoyen = non; Loi = 76-66; Livre = LIVRE III : DOMAINE PRIVE; Titre = TITRE III : ADMINISTRATION DU DOMAINE NON AFFECTE; Chapitre = CHAPITRE PREMIER : DOMAINE IMMOBILIER; Section = SECTION II : TERRAINS MIS EN VALEUR; Barêmes des prix des loyer = non;
+Références extraites : article = [], loi = ['loi'], code = [], decret = ['décret'], arrete = [], declaration = [], partie = [], livre = [], titre = [], chapitre = [], section = [], sous_section = [], paragraphe = [], alinea = []
+
+Output: (l'article actuel, correspond à, article 42 de la loi 76-66)
+END OF EXAMPLE
+
+EXAMPLE
+{text}Output:

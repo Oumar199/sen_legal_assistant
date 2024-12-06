@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+    <section class="py-5">
+        <div class="container py-5">
+            <div class="row mb-4 mb-lg-5">
+                <div class="col-md-8 col-xl-6 text-center mx-auto">
+                    <p class="fw-bold text-success mb-2">Nos Services</p>
+                    <h3 class="fw-bold"><strong>Qu'est ce qu'on peut faire pour vous</strong></h3>
+                </div>
+            </div>
+            <div class="row row-cols-1 row-cols-md-2 mx-auto" style="max-width: 900px;">
+                <div class="col mb-5"><img class="rounded img-fluid shadow" src="{{url_for('static', filename='img/products/Simple Processing legal texts.jpg')}}"></div>
+                <div class="col d-md-flex align-items-md-end align-items-lg-center mb-5">
+                    <div>
+                        <h5 class="fw-bold"><strong>Système de RAG&nbsp;</strong></h5>
+                        <p class="text-muted mb-4">Posez des questions à notre système de RAG sur le droit Sénégalais et obtenez des réponses satisfaisantes.</p><a class="btn btn-primary shadow" type="button" href="{{url_for('rag_system')}}">Essayez Maintenant</a>
+                    </div>
+                </div>
+            </div>
+            <div class="row row-cols-1 row-cols-md-2 mx-auto" style="max-width: 900px;">
+                <div class="col order-md-last mb-5"><img class="rounded img-fluid shadow" src="{{url_for('static', filename='img/products/simple processing of text.jpg')}}"></div>
+                <div class="col d-md-flex align-items-md-end align-items-lg-center mb-5">
+                    <div>
+                        <h5 class="fw-bold"><strong>Système Multi-Agent</strong></h5>
+                        <p class="text-muted mb-4">Utilisez notre système multi-agent qui fournit des réponses plus avancées en plus des références.</p><a class="btn btn-primary shadow" type="button" href="{{url_for('agent_system')}}">Essayez Maintenant</a>
+                    </div>
+                </div>
+            </div>
+            <div class="row row-cols-1 row-cols-md-2 mx-auto" style="max-width: 900px;">
+                <div class="col mb-5"><img class="rounded img-fluid shadow" src="{{url_for('static', filename='img/products/Textes sortant dun scan de document.jpg')}}"/></div>
+                <div class="col d-md-flex align-items-md-end align-items-lg-center mb-5">
+                    <div>
+                        <h5 class="fw-bold">Scan en Texte </h5>
+                        <p class="text-muted mb-4">Transformez des documents scannés en textes à l&#39;aide de nos systèmes de Reconnaissance Optique de Caractère (OCR) de dernières générations.</p><a class="btn btn-primary shadow" type="button"  href="{{url_for('ocr_system')}}">Essayez Maintenant</a>
+                    </div>
+                </div>
+            </div>        
+        </div>
+    </section>
+
+{% endblock content %}
