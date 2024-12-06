@@ -1,64 +1,5 @@
 $(document).ready(function() {
     
-    // ----------------------------------------------------------------------------------------
-    
-    // $('form.rag .left-choices select').on('change', function(e){
-    //     data_obj = {
-    //         domaine : $('form.mixtral-agent .left-choices select[name="domaine"]').val(),
-    //         loi : $('form.mixtral-agent .left-choices select[name="loi"]').val(),
-    //         decret : $('form.mixtral-agent .left-choices select[name="decret"]').val(),
-    //         arrete : $('form.mixtral-agent .left-choices select[name="arrete"]').val(),
-    //         declaration : $('form.mixtral-agent .left-choices select[name="declaration"]').val(),
-    //         partie : $('form.mixtral-agent .left-choices select[name="partie"]').val(),
-    //         livre : $('form.mixtral-agent .left-choices select[name="livre"]').val(),
-    //         titre : $('form.mixtral-agent .left-choices select[name="titre"]').val(),
-    //         sous_titre : $('form.mixtral-agent .left-choices select[name="sous_titre"]').val(),
-    //         chapitre : $('form.mixtral-agent .left-choices select[name="chapitre"]').val(),
-    //         section : $('form.mixtral-agent .left-choices select[name="section"]').val(),
-    //         sous_section : $('form.mixtral-agent .left-choices select[name="sous_section"]').val(),
-    //         application : $('form.mixtral-agent .left-choices select[name="application"]').val(),
-    //         loyer : $('form.mixtral-agent .left-choices select[name="loyer"]').val(),
-    //         localite : $('form.mixtral-agent .left-choices select[name="localite"]').val(),
-    //         categorie : $('form.mixtral-agent .left-choices select[name="categorie"]').val(),
-    //         habitation : $('form.mixtral-agent .left-choices select[name="habitation"]').val()
-    //     }
-
-    //     $.ajax({
-    //         data : data_obj,
-    //         type : 'POST',
-    //         url : '/rag_system/'
-    //     })
-    //     .done(function (data){
-    //         console.log(data)
-    //         const keys = Object.keys(data)
-            
-    //         keys.forEach(key => {
-                
-    //             $(`form.rag .left-choices select[name="${key}"]`).empty()
-                
-    //             data[key].forEach((element, i) => {
-                    
-    //                 let newOption = "";
-    //                 if (element == data_obj[key]){
-    //                     newOption = $(`<option selected></option>`)
-    //                             .attr('value', element)
-    //                             .text(element);
-    //                 }
-    //                 else{
-    //                     newOption = $('<option></option>')
-    //                             .attr('value', element)
-    //                             .text(element);
-    //                 }
-    
-    //                 $(`form.rag .left-choices select[name="${key}"]`).append(newOption)
-    //             });
-                
-    //         });
-            
-    //     });
-    //     e.preventDefault();
-        
-    // })
 
     $('#rag-form button[type="submit"]').on('click', function(e){
         
@@ -66,26 +7,9 @@ $(document).ready(function() {
         $('#loader').show();
 
         // Initialize result
-        $('.result span').html("En Attente de Réponse ...")
+        $('.result span').html("In waiting for a response ...")
 
         data_obj = {
-            // domaine : $('form.mixtral-agent .left-choices select[name="domaine"]').val(),
-            // loi : $('form.mixtral-agent .left-choices select[name="loi"]').val(),
-            // decret : $('form.mixtral-agent .left-choices select[name="decret"]').val(),
-            // arrete : $('form.mixtral-agent .left-choices select[name="arrete"]').val(),
-            // declaration : $('form.mixtral-agent .left-choices select[name="declaration"]').val(),
-            // partie : $('form.mixtral-agent .left-choices select[name="partie"]').val(),
-            // livre : $('form.mixtral-agent .left-choices select[name="livre"]').val(),
-            // titre : $('form.mixtral-agent .left-choices select[name="titre"]').val(),
-            // sous_titre : $('form.mixtral-agent .left-choices select[name="sous_titre"]').val(),
-            // chapitre : $('form.mixtral-agent .left-choices select[name="chapitre"]').val(),
-            // section : $('form.mixtral-agent .left-choices select[name="section"]').val(),
-            // sous_section : $('form.mixtral-agent .left-choices select[name="sous_section"]').val(),
-            // application : $('form.mixtral-agent .left-choices select[name="application"]').val(),
-            // loyer : $('form.mixtral-agent .left-choices select[name="loyer"]').val(),
-            // localite : $('form.mixtral-agent .left-choices select[name="localite"]').val(),
-            // categorie : $('form.mixtral-agent .left-choices select[name="categorie"]').val(),
-            // habitation : $('form.mixtral-agent .left-choices select[name="habitation"]').val(),
             query: $('form textarea[name="query"]').val(),
             temperature: $('form input[name="temperature"]').val(),
             base_n: $('form input[name="base_n"]').val(),
@@ -148,23 +72,9 @@ $(document).ready(function() {
                 }
                 else{
 
-                    $('.result span').html("Pas de Réponse Disponible pour le Moment.");
+                    $('.result span').html("No response available at the moment.");
 
                 }
-        
-                // $('#vector-response').html(`
-                //     <div class="card-body">
-                //         <div class='form-group blue-form'>
-                //             <label class="card-title">Réponse :</label>
-                //             <p class="card-text p-4 border">${data.response}</p>
-                //         </div>
-                //         <hr>
-                //         <div class='form-group blue-form'>
-                //             <label class="card-title">Requête :</label>
-                //             <p class="card-text p-4 border">${data.query}</p>
-                //         </div>
-                //     </div>
-                // `);
             },
             error: function(xhr, status, error) {
                 console.error('AJAX Error:', error);
@@ -205,14 +115,14 @@ $(document).ready(function() {
                     nodeText = node
                 }
 
-                if(data.node === "Filtration de Documents :"){
+                if(data.node === "Document Filtering :"){
                     $('.result span').html(`${nodeText}<p class="text-success" style="color:${color}!important">${log}</p><br>`)
                 }
                 else{
                     $('.result span').append(`${nodeText}<p class="text-success" style="color:${color}!important">${log}</p><br>`)
                 }
 
-                if(data.node === "Réponse Finale :"){
+                if(data.node === "Final Answer :"){
                     $('#loader').hide();
 
                     $('.response').html(log);
@@ -258,90 +168,15 @@ $(document).ready(function() {
         }
     }
 
-    // $('form.agent .left-choices select').on('change', function(e){
-    //     data_obj = {
-    //         domaine : $('form.mixtral-agent .left-choices select[name="domaine"]').val(),
-    //         loi : $('form.mixtral-agent .left-choices select[name="loi"]').val(),
-    //         decret : $('form.mixtral-agent .left-choices select[name="decret"]').val(),
-    //         arrete : $('form.mixtral-agent .left-choices select[name="arrete"]').val(),
-    //         declaration : $('form.mixtral-agent .left-choices select[name="declaration"]').val(),
-    //         partie : $('form.mixtral-agent .left-choices select[name="partie"]').val(),
-    //         livre : $('form.mixtral-agent .left-choices select[name="livre"]').val(),
-    //         titre : $('form.mixtral-agent .left-choices select[name="titre"]').val(),
-    //         sous_titre : $('form.mixtral-agent .left-choices select[name="sous_titre"]').val(),
-    //         chapitre : $('form.mixtral-agent .left-choices select[name="chapitre"]').val(),
-    //         section : $('form.mixtral-agent .left-choices select[name="section"]').val(),
-    //         sous_section : $('form.mixtral-agent .left-choices select[name="sous_section"]').val(),
-    //         application : $('form.mixtral-agent .left-choices select[name="application"]').val(),
-    //         loyer : $('form.mixtral-agent .left-choices select[name="loyer"]').val(),
-    //         localite : $('form.mixtral-agent .left-choices select[name="localite"]').val(),
-    //         categorie : $('form.mixtral-agent .left-choices select[name="categorie"]').val(),
-    //         habitation : $('form.mixtral-agent .left-choices select[name="habitation"]').val()
-    //     }
-
-    //     $.ajax({
-    //         data : data_obj,
-    //         type : 'POST',
-    //         url : '/agent_system/'
-    //     })
-    //     .done(function (data){
-    //         console.log(data)
-    //         const keys = Object.keys(data)
-            
-    //         keys.forEach(key => {
-                
-    //             $(`form.agent .left-choices select[name="${key}"]`).empty()
-                
-    //             data[key].forEach((element, i) => {
-                    
-    //                 let newOption = "";
-    //                 if (element == data_obj[key]){
-    //                     newOption = $(`<option selected></option>`)
-    //                             .attr('value', element)
-    //                             .text(element);
-    //                 }
-    //                 else{
-    //                     newOption = $('<option></option>')
-    //                             .attr('value', element)
-    //                             .text(element);
-    //                 }
-    
-    //                 $(`form.agent .left-choices select[name="${key}"]`).append(newOption)
-    //             });
-                
-    //         });
-            
-    //     });
-    //     e.preventDefault();
-        
-    // })
-
     $('#agent-form button[type="submit"]').on('click', function(e){
         
         // Show the loader
         $('#loader').show();
 
         // Initialize result
-        $('.result span').html("En Attente de Réponse ...")
+        $('.result span').html("In waiting for a response ...")
 
         data_obj = {
-            // domaine : $('form.mixtral-agent .left-choices select[name="domaine"]').val(),
-            // loi : $('form.mixtral-agent .left-choices select[name="loi"]').val(),
-            // decret : $('form.mixtral-agent .left-choices select[name="decret"]').val(),
-            // arrete : $('form.mixtral-agent .left-choices select[name="arrete"]').val(),
-            // declaration : $('form.mixtral-agent .left-choices select[name="declaration"]').val(),
-            // partie : $('form.mixtral-agent .left-choices select[name="partie"]').val(),
-            // livre : $('form.mixtral-agent .left-choices select[name="livre"]').val(),
-            // titre : $('form.mixtral-agent .left-choices select[name="titre"]').val(),
-            // sous_titre : $('form.mixtral-agent .left-choices select[name="sous_titre"]').val(),
-            // chapitre : $('form.mixtral-agent .left-choices select[name="chapitre"]').val(),
-            // section : $('form.mixtral-agent .left-choices select[name="section"]').val(),
-            // sous_section : $('form.mixtral-agent .left-choices select[name="sous_section"]').val(),
-            // application : $('form.mixtral-agent .left-choices select[name="application"]').val(),
-            // loyer : $('form.mixtral-agent .left-choices select[name="loyer"]').val(),
-            // localite : $('form.mixtral-agent .left-choices select[name="localite"]').val(),
-            // categorie : $('form.mixtral-agent .left-choices select[name="categorie"]').val(),
-            // habitation : $('form.mixtral-agent .left-choices select[name="habitation"]').val(),
             query: $('form textarea[name="query"]').val(),
             temperature: $('form input[name="temperature"]').val(),
             base_n: $('form input[name="base_n"]').val(),
@@ -373,28 +208,14 @@ $(document).ready(function() {
 
                 if(data.correct === true){
 
-                    $('.result span').html("En Attente de Réponse ...");
+                    $('.result span').html("In waiting for a response ...");
 
                 }
                 else{
 
-                    $('.result span').html("Pas de Réponse Disponible pour le Moment.");
+                    $('.result span').html("No response available at the moment.");
 
                 }
-                // $('title').text(data.title)
-
-            //     $('#vector-response').html(`<div class="card-body">
-                
-            //     <div class='form-group blue-form'>
-            //         <label class="card-title">Réponse :</label>
-            //         <p class="card-text p-4 border">${data.response}</p>
-            //     </div>
-            //     <hr>
-            //     <div class='form-group blue-form'>
-            //         <label class="card-title">Requête :</label>
-            //         <p class="card-text p-4 border">${data.query}</p>
-            //     </div>
-            // </div>`)
             },
             error: function(xhr, status, error) {
                 console.error('AJAX Error:', error);

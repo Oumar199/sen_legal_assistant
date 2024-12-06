@@ -12,7 +12,7 @@ class TextColors:
     CYAN = "\033[36m"
     WHITE = "\033[37m"
 
-def remove_metadata(docs, metadata_start="Références"):
+def remove_metadata(docs, metadata_start="References"):
 
     contents = []
 
@@ -44,7 +44,7 @@ def remove_metadata(docs, metadata_start="Références"):
 
     return contents
 
-def retrieve_content(docs, metadata_start="Références"):
+def retrieve_content(docs, metadata_start="References"):
 
     contents = [
         ":".join(content.split(":")[1:])
@@ -166,7 +166,7 @@ def add_extracted_ref_to_docs(ref_documents, references):
         )
 
         ref_docs_and_extractions.append(
-            ref_document + f"\nRéférences extraites : {ref_extraction}"
+            ref_document + f"\nExtracted references : {ref_extraction}"
         )
 
     return ref_docs_and_extractions
@@ -191,13 +191,13 @@ def get_triples_open(llm, prompt_template):
     return send_text
 
 class MakeDecision(BaseModel):
-    """Décision entre générer une réponse finale, rechercher plus d'informations sur le web ou récupérer plus de documents selon les références dans le contexte."""
+    """Decision on whether to generate a final answer, search for more information on the web, or retrieve more documents based on the references in the context."""
 
     decision: str = Field(
         description=(
-            " Si le nombre de documents de références est strictement supérieur à 0, et si le nombre de tentative d'extraction de références ne dépasse pas 3, et si le contexte spécifié avant le contexte extrait du web, contient une quelconque référence à des articles, lois, décrets, arrêté, Livres de texte juridique, Titres de texte juridique, Chapitres de texte juridique, Sections de texte juridique, Sous-sections de texte juridique ou Paragraphes, alors renvoyer 'references'."
-            " Sinon si le contexte ne contient aucune référence et n'est pas suffisamment clair, si le pourcentage de filtrage dépasse 70% et que le nombre de tentative de recherche ne dépasse pas 3, alors renvoyer 'search'"
-            " Sinon si le contexte contient suffisamment d'informations pour répondre à la requête, renvoyer 'final_answer'."
+            "If the number of reference documents is strictly greater than 0, and if the number of attempts to extract references does not exceed 3, and if the context specified before the context extracted from the web contains any reference to articles, laws, decrees, orders, legal textbooks, titles of legal texts, chapters of legal texts, sections of legal texts, subsections of legal texts, or paragraphs, then return 'references'."
+            " Otherwise, if the context contains no references and is not sufficiently clear, if the filtering percentage exceeds 70%, and the number of search attempts does not exceed 3, then return 'search'."
+            " Otherwise, if the context contains sufficient information to answer the request, return 'final_answer'."
         )
     )
 
@@ -220,25 +220,26 @@ def get_groq_llm_for_decision(model_name):
 
 def get_decider(llm, sys_prompt=None, human_prompt=None):
 
-    # Modèle de prompt pour la vérification des références
+    # Prompt model for reference verification
     SYS_PROMPT = (
-        """Vous êtes un expert en prise décision en fonction d'un contexte obtenu à partir d'une requête.
-Suivez ces instructions pour décider :
-- Réfléchissez étape par étape pour fournir votre décision.
-- Si le nombre de documents de références est strictement supérieur à 0, si le nombre de tentative d'extraction de références ne dépasse pas 3, et le contexte avant le contexte extrait du web contient une quelconque référence à des articles juridiques, lois, décrets, arrêté, Livres de texte juridique, Titres de texte juridique, Chapitres de texte juridique, Sections de texte juridique, Sous-sections de texte juridique ou Paragraphes, alors retourner 'references'.
-- Sinon si le contexte ne contient aucune référence et n'est pas assez clair ou si le pourcentage de filtrage dépasse 70% et que le nombre de tentative de recherche ne dépasse pas 3, retourner 'search'.
-- Sinon si le contexte ne contient aucune référence mais contient suffisamment d'informations pour répondre à la requête, retourner 'final_answer.
+    """You are an expert in decision-making based on a context obtained from a request.
+Follow these instructions to decide:
+- Think step-by-step to provide your decision.
+- If the number of reference documents is strictly greater than 0, if the number of attempts to extract references does not exceed 3, and the context before the context extracted from the web contains any reference to legal articles, laws, decrees, orders, legal textbooks, titles of legal texts, chapters of legal texts, sections of legal texts, subsections of legal texts, or paragraphs, then return 'references'.
+- Otherwise, if the context contains no references and is not clear enough, or if the filtering percentage exceeds 70% and the number of search attempts does not exceed 3, return 'search'.
+- Otherwise, if the context contains no references but contains sufficient information to answer the request, return 'final_answer'.
 """
+
         if sys_prompt is None
         else sys_prompt
     )
     HUMAN_PROMPT = (
-        """Requête :
-                    {query}
+        """Query :
+{query}
 
-                    Contexte :
-                    {context}
-                  """
+Contexte :
+{context}
+"""
         if human_prompt is None
         else human_prompt
     )
@@ -287,21 +288,22 @@ def get_web_search_query(llm, sys_prompt=None, human_prompt=None):
 
     # Prompt template for rewriting
     SYS_PROMPT = (
-        """Agissez en tant que reformulateur de questions et effectuez la tâche suivante :
-- Transformez la question d'entrée suivante en une version améliorée, optimisée pour la recherche sur le web.
-- Lors de la reformulation, examinez la question d'entrée et essayez de raisonner sur l'intention sémantique sous-jacente / la signification.
-- La question de sortie doit être rédigée en français.
-- Fournissez uniquement la question de sortie et rien d'autre.
+    """Act as a question reformulator and perform the following task:
+- Transform the following input question into an improved version, optimized for web search.
+- When reformulating, examine the input question and try to reason about the underlying semantic intent/meaning.
+- The output question must be written in French.
+- Provide only the output question and nothing else.
 """
+
         if sys_prompt is None
         else sys_prompt
     )
     HUMAN_PROMPT = (
         """Here is the initial question:
-                    {question}
+{question}
 
-                    Formulate an improved question.
-                    """
+Formulate an improved question.
+"""
         if human_prompt is None
         else human_prompt
     )
@@ -366,36 +368,34 @@ def web_search(query, search_tool):
 
 # Modèle de données pour le format de sortie des LLM
 class References(BaseModel):
-    article: List[str] = Field(description="Articles référés dans le document")
-    loi: List[str] = Field(description="Lois référées dans le document")
-    code: List[str] = Field(description="Codes juridiques référés dans le document")
-    decret: List[str] = Field(description="Décrets référés dans le document")
-    arrete: List[str] = Field(description="Arrêtés référées dans le document")
-    declaration: List[str] = Field(description="Déclarations référées dans le document")
+    article: List[str] = Field(description="Referenced articles in the document")
+    loi: List[str] = Field(description="Referenced laws in the document")
+    code: List[str] = Field(description="Referenced legal codes in the document")
+    decret: List[str] = Field(description="Referenced decrees in the document")
+    arrete: List[str] = Field(description="Referenced orders in the document")
+    declaration: List[str] = Field(description="Referenced declarations in the document")
     partie: List[str] = Field(
-        description="Parties de texte juridique référées dans le document"
+        description="Referenced parts (subdivision) of legal text in the document"
     )
     livre: List[str] = Field(
-        description="Livres de texte juridique référés dans le document"
+        description="Referenced books (subdivision) in the document"
     )
     titre: List[str] = Field(
-        description="Titres de texte juridique référés dans le document"
+        description="Referenced titles of legal texts in the document"
     )
     chapitre: List[str] = Field(
-        description="Chapitres de texte juridique référées dans le document"
+        description="Referenced chapters of legal texts in the document"
     )
     section: List[str] = Field(
-        description="Sections de texte juridique référées dans le document"
+        description="Referenced sections of legal texts in the document"
     )
     sous_section: List[str] = Field(
-        description="Sous-sections de texte juridique référées dans le document"
+        description="Referenced subsections of legal texts in the document"
     )
     paragraphe: List[str] = Field(
-        description="Paragraphes de texte juridique référés dans le document"
+        description="Referenced paragraphs of legal texts in the document"
     )
-    alinea: List[str] = Field(
-        description="Alinéas d'articles de texte juridique référés dans le document"
-    )  # added
+
 
 class AgentStatev1(TypedDict):
     # messages: Annotated[list[AnyMessage], operator.add]
@@ -544,8 +544,6 @@ class AgentSystemv1:
         graph.add_edge("get_final_answer", END)
 
         self.graph = graph.compile()
-        
-        # logs["new_log"]
     
     def init_log(self, node):
         
@@ -563,7 +561,7 @@ class AgentSystemv1:
         
         col_print("Entering Advanced Filtering Node:", TextColors.GREEN)
         
-        node = "Filtration de Documents :"
+        node = "Document Filtering :"
         
         self.init_log(node)
         
@@ -575,12 +573,12 @@ class AgentSystemv1:
 
         contexts = [doc.page_content for doc in docs]
 
-        context = "\n\n".join([doc for doc in contexts]) if len(contexts) > 0 else "Pas de contexte !"
+        context = "\n\n".join([doc for doc in contexts]) if len(contexts) > 0 else "No context !"
 
         if self.verbose:
             
-            result = f"""Pourcentage de filtrage => {round(perc, 2)}%
-Nombre de documents => {len(docs)}
+            result = f"""Filtering Percentage => {round(perc, 2)}%
+Filtering Percentage => {len(docs)}
 Documents => {context}"""
 #             result = f"""Result:
 # filter percentage => {round(perc, 2)}%
@@ -588,7 +586,7 @@ Documents => {context}"""
 # documents => {context}"""
             
             col_print(
-                "Résultats:\n" + result,
+                "Results:\n" + result,
                 TextColors.CYAN,
             )
             
@@ -608,26 +606,26 @@ Documents => {context}"""
 
         col_print("Entering Decision Node:", TextColors.GREEN)
 
-        node = "Prise de Décision :"
+        node = "Decision Making :"
         
         self.init_log(node)
 
         web_context = (
-            f"\n\nContexte Web : {state['web_context'].page_content}"
+            f"\n\nWeb Context : {state['web_context'].page_content}"
             if not state["web_context"] is None
             else ""
         )
 
         filter_percentage = (
-            f"\n\nPourcentage de filtrage : {round(state['filter_percentage'], 2)}%"
+            f"\n\nFiltering Percentage : {round(state['filter_percentage'], 2)}%"
             if not state["filter_percentage"] is None
             else ""
         )
 
         nombre_references = (
-            f"\n\nNombre de documents de références : {len(state['ref_documents'])}"
+            f"\n\nNumber of reference documents : {len(state['ref_documents'])}"
             if not state["ref_documents"] is None
-            else f"\n\nNombre de documents de références : 0"
+            else f"\n\nNumber of reference documents : 0"
         )
 
         if state["n_searches"] is None:
@@ -636,9 +634,9 @@ Documents => {context}"""
         if state["n_ref_retrieves"] is None:
             state["n_ref_retrieves"] = 0
 
-        n_searches = f"\n\nNombre de tentatives de recherche : {state['n_searches']}"
+        n_searches = f"\n\nNumber of search attempts : {state['n_searches']}"
 
-        n_ref_retrieves = f"\n\nNombre de tentatives d'extraction de références : {state['n_ref_retrieves']}"
+        n_ref_retrieves = f"\n\nNumber of reference extraction attempts : {state['n_ref_retrieves']}"
 
         context = (
             "\n\n".join([doc for doc in retrieve_content(state["documents"])])
@@ -664,14 +662,14 @@ Documents => {context}"""
 
         if self.verbose:
             
-            result = f"""Contexte => {context}
-Décision => {decision}"""
+            result = f"""Context => {context}
+Decision => {decision}"""
 #             result = f"""Result:
 # context => {context}
 # decision => {decision}"""
             
             col_print(
-                "Résultats :\n" + result,
+                "Results: :\n" + result,
                 TextColors.CYAN,
             )
             
@@ -679,19 +677,19 @@ Décision => {decision}"""
 
         if decision == "final_answer":
 
-            text = "Le contexte contient suffisamment d'informations pour fournir la réponse finale."
+            text = "The context contains sufficient information to provide the final answer."
 
         elif decision == "search":
 
-            text = "Le contexte ne contient pas assez d'informations pour fournir la réponse finale. Plus d'informations seront récupérées à partir du web."
+            text = "The context does not contain enough information to provide a final answer. More information will be retrieved from the web."
        
         elif decision == "references":
 
-            text = "Le contexte ne contient pas assez d'informations pour fournir la réponse finale. Plus d'informations seront récupérées à partir des références."
+            text = "The context does not contain enough information to provide a final answer. More information will be retrieved from the references."
 
         else:
 
-            raise ValueError(f"Décision non valide: {decision}")
+            raise ValueError(f"Invalid decision : {decision}")
 
         col_print(
             text,
@@ -708,7 +706,7 @@ Décision => {decision}"""
 
         col_print("Entering References Extraction Node:", TextColors.GREEN)
 
-        node = "Extraction de Références :"
+        node = "Reference extraction:"
         
         self.init_log(node)
         
@@ -726,7 +724,7 @@ Décision => {decision}"""
             
             if self.verbose and not self.log is None:
                 
-                self.update_log("Aucun document n'est disponible pour extraction !", "#f7797d")
+                self.update_log("No documents are available for extraction!", "#f7797d")
         
         for i in range(len(documents)):  # avec filtrage
             
@@ -738,7 +736,7 @@ Décision => {decision}"""
                     
                     if self.verbose:
                         
-                        log = f"Références extraites du document {i+1} => {ref}"
+                        log = f"References extracted from the document {i+1} => {ref}"
                         # log = f"References for document {i+1} => {ref}"
                         
                         col_print(log, TextColors.CYAN)
@@ -773,7 +771,7 @@ Décision => {decision}"""
 
         col_print("Entering Triples Extraction Node:", TextColors.GREEN)
         
-        node = "Extraction de Triples :"
+        node = "Triple extraction:"
         
         self.init_log(node)
 
@@ -805,7 +803,7 @@ Décision => {decision}"""
             
             if self.verbose and not self.log is None:
                 
-                self.update_log("Pas de triples extractables !", "#f7797d")
+                self.update_log("No extractable triples!", "#f7797d")
         
         for i, ref_doc in enumerate(ref_docs_and_extractions):
             get_triples = get_triples_open(self.triples_llm, self.triple_retriever_prompt)
@@ -821,7 +819,7 @@ Décision => {decision}"""
 
             if self.verbose:
                 col_print(
-                    f"""triples of document {i+1} =>
+                    f"""Triples of document {i+1} =>
     Document -> {ref_doc}
     Triples -> {triples}""",
                     TextColors.CYAN,
@@ -830,7 +828,7 @@ Décision => {decision}"""
                 
                 if not self.log is None: 
                     
-                    self.update_log(f"Triples du document {i+1} =>", "#00F260")
+                    self.update_log(f"Triples from the document {i+1} =>", "#00F260")
                     self.update_log(f"Document -> {ref_doc}", "#64f38c")
                     self.update_log(f"Triples -> {triples}", "#0575E6")
                     self.update_log(f"-----------", "white")
@@ -855,7 +853,7 @@ Décision => {decision}"""
 
         col_print("Entering Reference Documents Extraction Node:", TextColors.GREEN)
 
-        node = "Extraction de Documents Référencés :"
+        node = "Extraction of referenced documents:"
         
         self.init_log(node)
         
@@ -1066,7 +1064,7 @@ Décision => {decision}"""
 
                 if index_change:
 
-                    added = f"\nArticle(s) supplémentaire(s) :\n-> {ref_document_no_metadata}"
+                    added = f"Additional article(s) :\n-> {ref_document_no_metadata}"
 
                     distance = 0
 
@@ -1097,10 +1095,10 @@ Décision => {decision}"""
         context = "\n\n".join([doc.page_content for doc in all_ref_documents])
 
         if self.verbose:
-            result = f"""Nombre de documents => {len(all_ref_documents)}
-Documents de référence => {context}"""
+            result = f"""Number of documents => {len(all_ref_documents)}
+Reference documents: => {context}"""
             col_print(
-                "Résultats:\n" + result,
+                "Results:\n" + result,
                 TextColors.CYAN,
             )
             
@@ -1126,7 +1124,7 @@ Documents de référence => {context}"""
 
         col_print("Entering Web Search Node:", TextColors.GREEN)
  
-        node = "Extraction de contexte à partir du Web :"
+        node = "Extraction of context from the web:"
         
         self.init_log(node)
 
@@ -1158,13 +1156,13 @@ Documents de référence => {context}"""
 
         if self.verbose:
 
-            result = f"""Nouvelle requête => {new_query}
-Contexte web => {web_context.page_content}"""
+            result = f"""New query => {new_query}
+Web Context => {web_context.page_content}"""
 #             result = f"""Result:
 # New query => {new_query}
 # Web context => {web_context.page_content}"""
             
-            col_print("Résultats:\n" + result, TextColors.CYAN)
+            col_print("Results:\n" + result, TextColors.CYAN)
 
             self.update_log(result, "#64f38c")
             
@@ -1185,7 +1183,7 @@ Contexte web => {web_context.page_content}"""
 
         col_print("Entering Answer Node:", TextColors.GREEN)
         
-        node = "Réponse Finale :"
+        node = "Final Answer :"
         
         self.init_log(node)
 
@@ -1215,11 +1213,11 @@ Contexte web => {web_context.page_content}"""
 
         # if self.verbose:
         
-        result = f"""Réponse => {answer}"""
+        result = f"""Answer => {answer}"""
 #         result = f"""Result:
 # Answer => {answer}"""
             
-        col_print("Résultats:\n" + result, TextColors.CYAN)
+        col_print("Results:\n" + result, TextColors.CYAN)
         
         self.update_log(result, "#6dd5ed")
 

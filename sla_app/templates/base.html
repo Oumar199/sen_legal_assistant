@@ -19,11 +19,10 @@
         <div class="container"><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-1"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navcol-1"><a class="navbar-brand d-flex align-items-center" href="{{url_for('index')}}" style="text-align: center;"><span class="bs-icon-sm bs-icon-circle bs-icon-primary shadow d-flex justify-content-center align-items-center me-2 bs-icon"><i class="fa fa-balance-scale"></i></span><span>SLA</span></a>
                 <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link {% if page == 'index': %} active {% endif %}" href="{{url_for('index')}}">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link {% if page == 'index': %} active {% endif %}" href="{{url_for('index')}}">Home</a></li>
                     <li class="nav-item"><a class="nav-link {% if page == 'service': %} active {% endif %}" href="{{url_for('services')}}">Services</a></li>
-                    <li class="nav-item"><a class="nav-link {% if page == 'price': %} active {% endif %}" href="{{url_for('pricing')}}">Prix</a></li>
                     <li class="nav-item"><a class="nav-link {% if page == 'contact': %} active {% endif %}" href="{{url_for('contacts')}}">Contacts</a></li>
-                </ul><a class="btn btn-primary shadow" role="button" href="{{url_for('signup')}}">S'inscrire</a>
+                </ul>
             </div>
         </div>
     </nav>
@@ -36,7 +35,7 @@
             <div class="row justify-content-center">
                 <div class="col-lg-7 text-center text-lg-start d-flex flex-column align-items-center order-first align-items-lg-start order-lg-last" style="text-align: center;">
                     <div class="fw-bold d-flex align-items-center mb-2"></div>
-                    <p class="text-muted" style="text-align: center;margin-top: 10px;">Une nouvelle plateforme qui met à votre disposition un assistant juridique intelligent, fiable et facile d'utilisation.</p>
+                    <p class="text-muted" style="text-align: center;margin-top: 10px;">A new platform that provides you with an intelligent, reliable, and user-friendly legal assistant.</p>
                 </div>
             </div>
             <hr>

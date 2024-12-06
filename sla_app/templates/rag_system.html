@@ -3,120 +3,144 @@
 
 {% block content %}
 
-    <section class="py-5">
-        <div class="container py-4 py-xl-5">
-            <form id="rag-form" enctype="multipart/form-data">
-                <div class="card text-center">
-                    <div class="card-header text-primary" style="background: #1d4350;padding: 2rem;"><span class="text-uppercase fs-3" style="font-size:20px;font-weight:bold;color:var(--bs-body-bg);">Conversation avec le système de RAG</span></div>
-                    <div class="card-body border-1" style="border-style: solid;border-color: #1d4350;border-top: 0px none rgb(45, 45, 45) ;">
-                        <div class="w-100" style="position: relative;height: 1px;"><i class="fas fa-users icon" aria-hidden="true" style="font-size: 35px;position: absolute;top: -4500%;left: -3.6%;color: #1d4350;background: var(--bs-body-bg);border-style: solid;padding: 0.4rem;border-radius: 20px;"></i></div>
-                        <p class="fs-5 card-text" style="font-weight: bold;color: rgb(29,67,80);">Posez une question</p><textarea class="form-control" name="query" placeholder="Est-ce que les femmes ont les mêmes droit que les hommes en matière de construction de batîments ?"></textarea>
-                        <div class="text-center">
-                            <div class="row" style="text-align:center;">
-                                <div class="col-md-3 offset-md-3"><button type="submit" class="btn btn-primary" href="#">Envoyer</button></div>
-                                <div class="col-md-3"><button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#exampleModalLong">Paramètres</button></div>
+<section class="py-5">
+    <div class="container py-4 py-xl-5">
+        <form id="rag-form" enctype="multipart/form-data">
+            <div class="card text-center">
+                <div class="card-header text-primary" style="background: #1d4350;padding: 2rem;">
+                    <span class="text-uppercase fs-3" style="font-size:20px;font-weight:bold;color:var(--bs-body-bg);">Conversation with the RAG system</span>
+                </div>
+                <div class="card-body border-1" style="border-style: solid;border-color: #1d4350;border-top: 0px none rgb(45, 45, 45);">
+                    <div class="w-100" style="position: relative;height: 1px;">
+                        <i class="fas fa-users icon" aria-hidden="true" style="font-size: 35px;position: absolute;top: -4500%;left: -3.6%;color: #1d4350;background: var(--bs-body-bg);border-style: solid;padding: 0.4rem;border-radius: 20px;"></i>
+                    </div>
+                    <p class="fs-5 card-text" style="font-weight: bold;color: rgb(29,67,80);">Ask a question</p>
+                    <textarea class="form-control" name="query" placeholder="Do women have the same rights as men in building construction?"></textarea>
+                    <div class="text-center">
+                        <div class="row" style="text-align:center;">
+                            <div class="col-md-3 offset-md-3">
+                                <button type="submit" class="btn btn-primary" href="#">Send</button>
                             </div>
-                        </div><div id="exampleModalLong" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="exampleModalLongTitle" class="modal-title">Paramètres</h5><button class="close" aria-label="Close" data-bs-dismiss="modal" type="button" style="margin-left:20rem"><span aria-hidden="true">×</span></button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="temperature">Température</label>
-                    <input id="temperature" name="temperature" type="number" class="form-control" placeholder="Température" step=".01" min=".01", max="1" value="{{temperature}}">
-                </div>
-                <hr class="hr-blurry">
-                <div class="form-group">
-                    <label for="base_n">Nombre de Récupérations (Similarité)</label>
-                    <input type="number" name="base_n" class="form-control" placeholder="Nombre Récupérations" min="2", max="15" value="{{base_n}}">
-                </div>
-                <hr class="hr-blurry">
-                <div class="form-group">
-                    <label for="bm25_n">Nombre de Récupérations (BM25)</label>
-                    <input type="number" name="bm25_n" class="form-control" placeholder="Nombre Récupérations" min="2", max="15" value="{{bm25_n}}">
-                </div>
-                <hr class="hr-blurry">
-                <div class="form-group">
-                    <label for="chat_model">Modèle de Conversation</label>
-                    <select class="form-select" aria-label="Default select example" name = "chat_model">
-                        <option selected value="{{chat_models['sel']}}">{{chat_models['sel']}}</option>
-                        {% for option in chat_models['nsel'] %}
-                        <option value="{{option}}">{{option}}</option>
-                        {% endfor %}
-                        </select>
-                </div>
-                <hr class="hr-blurry">
-                <div class="form-group">
-                    <label for="embedding_id">Modèle d'Incorporation (embedding)</label>
-                    <select class="form-select" aria-label="Default select example" name = "embedding_id">
-                        <option selected value="{{embedding_ids['sel']}}">{{embedding_ids['sel']}}</option>
-                        {% for option in embedding_ids['nsel'] %}
-                        <option value="{{option}}">{{option}}</option>
-                        {% endfor %}
-                        </select>
-                </div>
-                <hr class="hr-blurry">
-                <div class="form-group">
-                    <label for="metric">Métrique de Calcul de Similarité</label>
-                    <select class="form-select" aria-label="Default select example" name = "metric">
-                        <option selected value="{{metrics['sel']}}">{{metrics['sel']}}</option>
-                        {% for option in metrics['nsel'] %}
-                        <option value="{{option}}">{{option}}</option>
-                        {% endfor %}
-                        </select>
-                </div>
-                <hr class="hr-blurry">
-                <div class="form-group">
-                    <label for="reranker">Modèle de Réarrangement de Documents</label>
-                    <select class="form-select" aria-label="Default select example" name = "reranker">
-                        <option selected value="{{rerankers['sel']}}">{{rerankers['sel']}}</option>
-                        {% for option in rerankers['nsel'] %}
-                        <option value="{{option}}">{{option}}</option>
-                        {% endfor %}
-                        </select>
-                </div>
-                <hr class="hr-blurry">
-                <div class="form-group">
-                    <label for="c_prompt">Invite (Prompt) pour les Citoyens</label>
-                    <textarea type="text" name="c_prompt" class="form-control" rows = 10>{{c_prompt}}</textarea>
-                </div>
-                <hr class="hr-blurry">
-                <div class="form-group">
-                    <label for="e_prompt">Invite (Prompt) pour les Experts</label>
-                    <textarea type="text" name="e_prompt" class="form-control" rows = 10>{{e_prompt}}</textarea>
-                </div>
-            </div>
-            <div class="modal-footer"><button class="btn btn-primary" data-bs-dismiss="modal" type="button">Sauvegarder</button></div>
-        </div>
-    </div>
-</div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#exampleModalLong">Settings</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="exampleModalLong" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 id="exampleModalLongTitle" class="modal-title">Settings</h5>
+                                    <button class="close" aria-label="Close" data-bs-dismiss="modal" type="button" style="margin-left:20rem">
+                                        <span aria-hidden="true">×</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="temperature">Temperature</label>
+                                        <input id="temperature" name="temperature" type="number" class="form-control" placeholder="Temperature" step=".01" min=".01" max="1" value="{{temperature}}">
+                                    </div>
+                                    <hr class="hr-blurry">
+                                    <div class="form-group">
+                                        <label for="base_n">Number of Recoveries (Similarity)</label>
+                                        <input type="number" name="base_n" class="form-control" placeholder="Number of Recoveries" min="2" max="15" value="{{base_n}}">
+                                    </div>
+                                    <hr class="hr-blurry">
+                                    <div class="form-group">
+                                        <label for="bm25_n">Number of Recoveries (BM25)</label>
+                                        <input type="number" name="bm25_n" class="form-control" placeholder="Number of Recoveries" min="2" max="15" value="{{bm25_n}}">
+                                    </div>
+                                    <hr class="hr-blurry">
+                                    <div class="form-group">
+                                        <label for="chat_model">Chat Model</label>
+                                        <select class="form-select" aria-label="Default select example" name="chat_model">
+                                            <option selected value="{{chat_models['sel']}}">{{chat_models['sel']}}</option>
+                                            {% for option in chat_models['nsel'] %}
+                                            <option value="{{option}}">{{option}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <hr class="hr-blurry">
+                                    <div class="form-group">
+                                        <label for="embedding_id">Embedding Model</label>
+                                        <select class="form-select" aria-label="Default select example" name="embedding_id">
+                                            <option selected value="{{embedding_ids['sel']}}">{{embedding_ids['sel']}}</option>
+                                            {% for option in embedding_ids['nsel'] %}
+                                            <option value="{{option}}">{{option}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <hr class="hr-blurry">
+                                    <div class="form-group">
+                                        <label for="metric">Similarity Calculation Metric</label>
+                                        <select class="form-select" aria-label="Default select example" name="metric">
+                                            <option selected value="{{metrics['sel']}}">{{metrics['sel']}}</option>
+                                            {% for option in metrics['nsel'] %}
+                                            <option value="{{option}}">{{option}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <hr class="hr-blurry">
+                                    <div class="form-group">
+                                        <label for="reranker">Document Reranking Model</label>
+                                        <select class="form-select" aria-label="Default select example" name="reranker">
+                                            <option selected value="{{rerankers['sel']}}">{{rerankers['sel']}}</option>
+                                            {% for option in rerankers['nsel'] %}
+                                            <option value="{{option}}">{{option}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <hr class="hr-blurry">
+                                    <div class="form-group">
+                                        <label for="c_prompt">Prompt for Citizens</label>
+                                        <textarea type="text" name="c_prompt" class="form-control" rows=10>{{c_prompt}}</textarea>
+                                    </div>
+                                    <hr class="hr-blurry">
+                                    <div class="form-group">
+                                        <label for="e_prompt">Prompt for Experts</label>
+                                        <textarea type="text" name="e_prompt" class="form-control" rows=10>{{e_prompt}}</textarea>
+                                    </div>
+                                    </div>
+                                    <div class="modal-footer"><button class="btn btn-primary" data-bs-dismiss="modal" type="button">Save</button></div>
+                                    </div>
+                                    </div>
+                                    </div>
+                                    
                     </div>
                     <div class="card-body border-1" style="border-style: solid;border-color: #a43931;border-top: 0px none rgb(45, 45, 45) ;">
                         <div class="w-100" style="position: relative;height: 1px;"><svg class="bi bi-robot icon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" style="font-size:58px;position:absolute;top:-4500%;left:-3.6%;color:var(--bs-link-hover-color);background:var(--bs-body-bg);border-style:solid;padding:0.4rem;border-radius:20px;color:#A43931">
                             <path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5M3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.58 26.58 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.933.933 0 0 1-.765.935c-.845.147-2.34.346-4.235.346-1.895 0-3.39-.2-4.235-.346A.933.933 0 0 1 3 9.219zm4.542-.827a.25.25 0 0 0-.217.068l-.92.9a24.767 24.767 0 0 1-1.871-.183.25.25 0 0 0-.068.495c.55.076 1.232.149 2.02.193a.25.25 0 0 0 .189-.071l.754-.736.847 1.71a.25.25 0 0 0 .404.062l.932-.97a25.286 25.286 0 0 0 1.922-.188.25.25 0 0 0-.068-.495c-.538.074-1.207.145-1.98.189a.25.25 0 0 0-.166.076l-.754.785-.842-1.7a.25.25 0 0 0-.182-.135Z"></path>
                             <path d="M8.5 1.866a1 1 0 1 0-1 0V3h-2A4.5 4.5 0 0 0 1 7.5V8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1v-.5A4.5 4.5 0 0 0 10.5 3h-2zM14 7.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.5A3.5 3.5 0 0 1 5.5 4h5A3.5 3.5 0 0 1 14 7.5"></path>
                         </svg></div>
-                        <p class="fs-5 card-text" style="font-weight: bold;color: rgb(164,57,49);border-color: rgb(164,57,49);">Réponse du système</p>
-                        <p class="card-text response" style="color: rgb(15,32,39);">La réponse sera fournie ici ...</p>
+                        <p class="fs-5 card-text" style="font-weight: bold;color: rgb(164,57,49);border-color: rgb(164,57,49);">System Response</p>
+                        <p class="card-text response" style="color: rgb(15,32,39);">The response will be provided here...</p>
                         <div class="text-danger visible spinner-border" id="loader" role="status" style="width:60px;height:60px;border-width:10px;display:None;"><span class="sr-only">Loading...</span></div>
                         <div class="text-center"></div>
-                    </div>
-                </div>
-                <hr class="hr-blurry">
-            </form>
-        </div>
-    </section>
-    <div class="container"><div id="accordion">
-    <div class="card">
-        <div id="headingOne" class="card-header bg-light" style="background: var(--bs-gray-500);padding: 0;">
-            <h4 class="mb-0" style="padding: 0px;padding-top: initial;"><button class="btn bg-light rounded-0" data-bs-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne" style="margin: 0;width: 100%;text-align: center;" href="#collapseOne">Résultats du Système</button></h4>
-        </div>
-        <div id="collapseOne" class="collapse show result" aria-labelledby="headingOne" data-parent="#accordion">
-            <div class="card-body overflow-auto" style="border-color: var(--bs-emphasis-color);background: var(--bs-highlight-color);color: var(--bs-body-bg);height: 500px;"><span style = "font-family: 'Courier New', Courier, monospace;">Pas de Réponse Disponible pour le Moment.</span></div>
-        </div>
-    </div>
-</div></div>
+                        </div>
+                        </div>
+                        <hr class="hr-blurry">
+                        </form>
+                        </div>
+                        </section>
+                        <div class="container">
+                            <div id="accordion">
+                                <div class="card">
+                                    <div id="headingOne" class="card-header bg-light" style="background: var(--bs-gray-500);padding: 0;">
+                                        <h4 class="mb-0" style="padding: 0px;padding-top: initial;">
+                                            <button class="btn bg-light rounded-0" data-bs-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne" style="margin: 0;width: 100%;text-align: center;" href="#collapseOne">System Results</button>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseOne" class="collapse show result" aria-labelledby="headingOne" data-parent="#accordion">
+                                        <div class="card-body overflow-auto" style="border-color: var(--bs-emphasis-color);background: var(--bs-highlight-color);color: var(--bs-body-bg);height: 500px;">
+                                            <span style="font-family: 'Courier New', Courier, monospace;">No Response Available at the Moment.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
 
 {% endblock content %}
+
+
+

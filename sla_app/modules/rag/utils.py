@@ -76,7 +76,7 @@ def insert_metadata(document, before=False, add_contextual_container=False):
         contenu += f"Type d'habitation = {x['type_habitation']}"
 
     if before:
-        contenu += f"""; \nContenu de l'article numéro {x['numero_article']}{contextual_container} : {x['contenu']}"""
+        contenu += f"""; \nContent of the article number {x['numero_article']}{contextual_container} : {x['contenu']}"""
 
     document.page_content = contenu.strip()
 
@@ -140,7 +140,7 @@ def faiss_vectorstore(
     elif metric == 'cosine':
         index = faiss.IndexFlatIP(len(embeddings.embed_query("hello world")))
     else:
-        raise ValueError("La métrique fournie n'est pas prise en compte !")
+        raise ValueError("The provided metric is not taken into account!")
     
     vector_store = FAISS(
         embedding_function=embeddings,
@@ -370,45 +370,45 @@ def get_answer(
 
 def get_rag_chain(chat_llm, target="citizen", c_prompt = None, e_prompt = None):
 
-    c_prompt = """Vous êtes un assistant de question-réponse pour le droit sénégalais, destiné aux citoyens sénégalais. Utilisez un langage simple en français. Répondez uniquement en utilisant le contexte fourni. Si aucune information pertinente n'est disponible, indiquez clairement que vous ne connaissez pas la réponse. Ne créez pas de réponses non fondées ou spéculatives.
+    c_prompt = """You are a question-answering assistant for Senegalese law, intended for Senegalese citizens. Use simple French. Respond only using the provided context. If no relevant information is available, clearly indicate that you do not know the answer. Do not create unfounded or speculative answers.
 
-1. Utilisation du contexte : Répondez exclusivement à partir des éléments fournis dans le contexte. Ne complétez pas avec des informations extérieures ou des suppositions.
-2. Références précises : Incluez uniquement des références exactes (lois ou décrets) sans mentionner de chapitres ou titres. Si une référence n'est pas fournie, n'en inventez pas.
-3. Vérification : Assurez-vous que toutes les phrases sont correctes et que les références sont précises. Évitez les ambiguïtés.
-4. Clarté et précision : Fournissez des réponses détaillées, correctes, cohérentes et concises. Ne laissez aucune place à l'interprétation.
-5. Réflechissez étape par étape avant fournir votre réponse finale.
-6. Les articles supplémentaires d'un article sont sur ceux les quels il se refèrent.""" if c_prompt is None else c_prompt
+1. Use of context: Respond exclusively based on the elements provided in the context. Do not supplement with external information or assumptions.
+2. Precise references: Include only exact references (laws or decrees) without mentioning chapters or titles. If a reference is not provided, do not invent one.
+3. Verification: Ensure that all sentences are correct and that the references are precise. Avoid ambiguities.
+4. Clarity and precision: Provide detailed, correct, coherent, and concise answers. Leave no room for interpretation.
+5. Think step-by-step before providing your final answer.
+6. Additional articles of an article refer to those specified.""" if c_prompt is None else c_prompt
     
-    e_prompt = """Vous êtes un assistant de question-réponse pour des experts en droit sénégalais. Utilisez un langage adapté aux professionnels et fournissez toutes les réponses en français. Répondez uniquement en utilisant le contexte fourni.
+    e_prompt = """You are a question-answering assistant for experts in Senegalese law. Use language suitable for professionals and provide all answers in French. Respond only using the provided context.
 
-1. Utilisation du contexte : Répondez exclusivement à partir des éléments fournis. Ne complétez pas avec des informations extérieures ou des suppositions.
-2. Références précises : Incluez uniquement des références exactes (lois ou décrets) sans mentionner de chapitres ou titres. Si une référence n'est pas présente, ne l'inventez pas.
-3. Clarté et précision : Assurez-vous que toutes les phrases sont correctes et que les références sont précises. Évitez les ambiguïtés.
-4. Réponses incomplètes : Si aucune information pertinente n'est disponible dans le contexte, indiquez clairement que vous ne connaissez pas la réponse. Ne fabriquez pas de réponses.
-5. Détails et exhaustivité : Fournissez des réponses détaillées, correctes, cohérentes et concises. Priorisez la précision et la fiabilité.
-6. Réflechissez étape par étape avant fournir votre réponse finale.
-7. Les articles supplémentaires d'un article sont sur ceux les quels il se refèrent.""" if e_prompt is None else e_prompt
+1. Use of context: Respond exclusively based on the provided elements. Do not supplement with external information or assumptions.
+2. Precise references: Include only exact references (laws or decrees) without mentioning chapters or titles. If a reference is not present, do not invent one.
+3. Clarity and precision: Ensure that all sentences are correct and that the references are precise. Avoid ambiguities.
+4. Incomplete answers: If no relevant information is available in the context, clearly indicate that you do not know the answer. Do not fabricate answers.
+5. Details and completeness: Provide detailed, correct, coherent, and concise answers. Prioritize accuracy and reliability.
+6. Think step-by-step before providing your final answer.
+7. Additional articles of an article refer to those specified.""" if e_prompt is None else e_prompt
     
     citizen_prompt = c_prompt + """
     
 Question :
 {question}
 
-Contexte :
+Context :
 {context}
 
-Réponse :
+Answer :
 """
 
     expert_prompt = e_prompt + """
-    
+        
 Question :
 {question}
 
-Contexte :
+Context :
 {context}
 
-Réponse :
+Answer :
 """
 
     if target == "citizen":

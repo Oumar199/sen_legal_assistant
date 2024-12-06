@@ -1,29 +1,17 @@
-from flask import render_template, request, jsonify, url_for, session, Response, Flask, stream_with_context
+from flask import render_template, request, jsonify, session, Response, Flask, stream_with_context
 from sla_app.modules.rag import ChatGroq, ChatMistralAI
 from sla_app.modules.agent import PydanticOutputParser
-from langchain.prompts import PromptTemplate
 import sla_app.modules.agent.utils as agent
-import sla_app.modules.mixtral.utils as mix
-from werkzeug.utils import secure_filename
 import sla_app.modules.rag.utils as rag
-from langchain_openai import ChatOpenAI
 from flask_session import Session
 from sla_app import app as server
 from dotenv import load_dotenv
-import concurrent.futures
-from PIL import Image
 import pandas as pd
 import threading
-import datetime
 import time
 import json
-import csv
-import ast
 import re
 import os # pour la clé de l'api
-# from flask_wtf import FlaskForm
-# from wtforms import FileField, SubmitField
-# from wtforms.validators import DataRequired
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -139,43 +127,43 @@ Think step by step and extract all legal references from the context.
 context={context}
 """
 
-SEARCH_PROMPT = """Agissez en tant que reformulateur de questions et effectuez la tâche suivante :
-- Transformez la question d'entrée suivante en une version améliorée, optimisée pour la recherche sur le web.
-- Lors de la reformulation, examinez la question d'entrée et essayez de raisonner sur l'intention sémantique sous-jacente / la signification.
-- La question de sortie doit être rédigée en français.
-- Fournissez uniquement la question de sortie et rien d'autre.
-- Notez que la question est posée par une personne sénégalaise.
-- Ajoutez plus de contexte à la requête si nécessaire.
-"""
-              
-DECISION_PROMPT = """Vous êtes un expert en prise décision en fonction d'un contexte obtenu à partir d'une requête.
-Suivez ces instructions pour décider :
-- Si le nombre de documents de références (défini en fin de contexte) est strictement supérieur à 0, si le nombre de tentatives d'extraction de références (défini en fin de contexte) ne dépasse pas 3, et le contexte avant le contexte extrait du web contient une quelconque référence à des articles juridiques, lois, décrets, arrêté, Livres de texte juridique, Titres de texte juridique, Chapitres de texte juridique, Sections de texte juridique, Sous-sections de texte juridique ou Paragraphes, alors retourner 'references'.
-- Sinon si le contexte ne contient aucune référence et n'est pas assez clair ou si le pourcentage de filtrage dépasse 70% et que le nombre de tentatives de recherche (défini en fin de contexte) ne dépasse pas 3, retourner 'search'.
-- Sinon si le contexte ne contient aucune référence mais contient suffisamment d'informations pour répondre à la requête, retourner 'final_answer.
-- Surtout prenez garde à ne pas dépasser les limites des nombres de tentatives.
-- Réfléchissez étape par étape avant de fournir votre décision.
+SEARCH_PROMPT = """Act as a question reformulator and perform the following task:
+- Transform the following input question into an improved version, optimized for web search.
+- When reformulating, examine the input question and try to reason about the underlying semantic intention/meaning.
+- The output question must be written in French.
+- Provide only the output question and nothing else.
+- Note that the question is asked by a Senegalese person.
+- Add more context to the request if necessary.
 """
 
-c_prompt = """Vous êtes un assistant de question-réponse pour le droit sénégalais, destiné aux citoyens sénégalais. Utilisez un langage simple en français. Répondez uniquement en utilisant le contexte fourni. Si aucune information pertinente n'est disponible, indiquez clairement que vous ne connaissez pas la réponse. Ne créez pas de réponses non fondées ou spéculatives.
+DECISION_PROMPT = """You are a decision-making expert based on a context obtained from a query.
+Follow these instructions to decide:
+- If the number of reference documents (defined at the end of the context) is strictly greater than 0, if the number of attempts to extract references (defined at the end of the context) does not exceed 3, and the context before the web-extracted context contains any reference to legal articles, laws, decrees, legal textbooks, legal text titles, legal text chapters, legal text sections, legal text subsections, or paragraphs, then return 'references'.
+- Otherwise, if the context contains no references and is not clear enough or if the filtering percentage exceeds 70% and the number of search attempts (defined at the end of the context) does not exceed 3, return 'search'.
+- Otherwise, if the context contains no references but has enough information to answer the request, return 'final_answer'.
+- Be especially careful not to exceed the limits on the number of attempts.
+- Think step by step before providing your decision.
+"""
 
-1. Utilisation du contexte : Répondez exclusivement à partir des éléments fournis dans le contexte. Ne complétez pas avec des informations extérieures ou des suppositions.
-2. Références précises : Incluez uniquement des références exactes (lois ou décrets) sans mentionner de chapitres ou titres. Si une référence n'est pas fournie, n'en inventez pas.
-3. Vérification : Assurez-vous que toutes les phrases sont correctes et que les références sont précises. Évitez les ambiguïtés.
-4. Clarté et précision : Fournissez des réponses détaillées, correctes, cohérentes et concises. Ne laissez aucune place à l'interprétation.
-6. Les articles supplémentaires d'un article sont sur ceux les quels il se refèrent.
-5. Réflechissez étape par étape avant de fournir votre réponse finale.
+c_prompt = """You are a question-answering assistant for Senegalese law, aimed at Senegalese citizens. Use simple language in French. Respond only using the provided context. If no relevant information is available, clearly indicate that you do not know the answer. Do not create unfounded or speculative responses.
+
+1. Use of context: Respond exclusively based on the elements provided in the context. Do not supplement with external information or assumptions.
+2. Precise references: Include only exact references (laws or decrees) without mentioning chapters or titles. If a reference is not provided, do not invent one.
+3. Verification: Ensure that all sentences are correct and that references are precise. Avoid ambiguities.
+4. Clarity and precision: Provide detailed, correct, coherent, and concise answers. Leave no room for interpretation.
+5. The additional articles of an article refer to those to which they relate.
+6. Think step by step before providing your final answer.
 """ 
-    
-e_prompt = """Vous êtes un assistant de question-réponse pour des experts en droit sénégalais. Utilisez un langage adapté aux professionnels et fournissez toutes les réponses en français. Répondez uniquement en utilisant le contexte fourni.
 
-1. Utilisation du contexte : Répondez exclusivement à partir des éléments fournis. Ne complétez pas avec des informations extérieures ou des suppositions.
-2. Références précises : Incluez uniquement des références exactes (lois ou décrets) sans mentionner de chapitres ou titres. Si une référence n'est pas présente, ne l'inventez pas.
-3. Clarté et précision : Assurez-vous que toutes les phrases sont correctes et que les références sont précises. Évitez les ambiguïtés.
-4. Réponses incomplètes : Si aucune information pertinente n'est disponible dans le contexte, indiquez clairement que vous ne connaissez pas la réponse. Ne fabriquez pas de réponses.
-5. Détails et exhaustivité : Fournissez des réponses détaillées, correctes, cohérentes et concises. Priorisez la précision et la fiabilité.
-7. Les articles supplémentaires d'un article sont sur ceux les quels il se refèrent.
-6. Réflechissez étape par étape avant de fournir votre réponse finale.
+e_prompt = """You are a question-answering assistant for experts in Senegalese law. Use language suitable for professionals and provide all answers in French. Respond only using the provided context.
+
+1. Use of context: Respond exclusively based on the provided elements. Do not supplement with external information or assumptions.
+2. Precise references: Include only exact references (laws or decrees) without mentioning chapters or titles. If a reference is not present, do not invent one.
+3. Clarity and precision: Ensure that all sentences are correct and that references are precise. Avoid ambiguities.
+4. Incomplete answers: If no relevant information is available in the context, clearly indicate that you do not know the answer. Do not fabricate responses.
+5. Details and completeness: Provide detailed, correct, coherent, and concise answers. Prioritize accuracy and reliability.
+6. The additional articles of an article refer to those to which they relate.
+7. Think step by step before providing your final answer.
 """
 
 
@@ -322,22 +310,6 @@ def signup():
             error=e,
             src = "https://www.youtube.com/embed/dsUXAEzaC3Q"
         )
-        
-@server.route("/ocr_system")    
-def ocr_system():
-    
-    try:
-        
-        return render_template("ocr_system.html", title = "Scan en Texte", page = 'ocr')
-            
-    except Exception as e:
-        agent.col_print(e, agent.TextColors.RED)
-        return render_template(
-            "error.html",
-            title="Error",
-            error=e,
-            src = "https://www.youtube.com/embed/dsUXAEzaC3Q"
-        )
 
 def substitute_strong(text):
 
@@ -412,7 +384,6 @@ def rag_generator():
         add_contextual_container=True,
     )
     
-    # db = rag.get_chroma_vectorstore(documents, embeddings, metric = "l2")
     db = rag.get_faiss_vectorstore(documents, embeddings, metric = metrics["sel"], load=load)
     
     base_retriever = rag.get_document_extractor(db, n=base_n)  # semantic_similarity retriever
@@ -510,12 +481,12 @@ def chat_generator():
         target=targets["sel"]
     )
     
-    # envoie de la requête
+    # sending the query to the multi-agent system
     try:
         result = agent_system.invoke({"query": query}, config = {'recursion_limit': max_iter})
     except RecursionError:
-        logs["results"].append([{"log": "Nombre Maximale d'Itérations Atteint !", "color": "red"}])
-        logs["nodes"].append("Critère d'Erreur :")
+        logs["results"].append([{"log": "Maximum number of iterations reached !", "color": "red"}])
+        logs["nodes"].append("Error Criterion :")
     
     response = result['answer']
     
@@ -571,7 +542,7 @@ def log_generator():
             print(len(result), log_offset, result_offset)
             if len(result) > log_offset:
                 
-                if node == "Réponse Finale :":
+                if node == "Final Answer :":
                     
                     log = result[log_offset]
                     
@@ -689,33 +660,12 @@ def rag_system():
     global e_prompt
     global load
     
-    # copy metadata dataframe
-    articles_ = articles.copy()
-    
     # initialize the context
     contexts = []
     
     try:
         
         if request.method == "POST":
-            
-            # domaine = request.form.get('domaine')
-            # loi = request.form.get('loi')
-            # decret = request.form.get('decret')
-            # arrete = request.form.get('arrete')
-            # declaration = request.form.get('declaration')
-            # partie = request.form.get('partie')
-            # livre = request.form.get('livre')
-            # titre = request.form.get('titre')
-            # sous_titre = request.form.get('sous_titre')
-            # chapitre = request.form.get('chapitre')
-            # section = request.form.get('section')
-            # sous_section = request.form.get('sous_section')
-            # application = request.form.get('application')
-            # loyer = request.form.get('loyer')
-            # localite = request.form.get('localite')
-            # categorie = request.form.get('categorie')
-            # habitation = request.form.get('habitation')
 
             query = request.form.get('query')
             
@@ -764,38 +714,8 @@ def rag_system():
             c_prompt = request.form.get('c_prompt')
             
             e_prompt = request.form.get('e_prompt')
-            
-            # if query is None:
-                
-                # articles_.rename(column_map, axis = 1, inplace = True)
-                
-                # articles_ = mix.filter_articles(
-                #     articles_,
-                #     domaine = domaine,
-                #     loi = loi,
-                #     decret = decret,
-                #     arrete = arrete,
-                #     declaration = declaration,
-                #     partie = partie,
-                #     livre = livre,
-                #     titre = titre,
-                #     sous_titre = sous_titre,
-                #     chapitre = chapitre,
-                #     section = section,
-                #     sous_section = sous_section,
-                #     application = application,
-                #     loyer = loyer,
-                #     localite = localite,
-                #     categorie = categorie,
-                #     habitation = habitation
-                # )
-                  
-                # uniques = mix.get_metadata_as_dict(articles_)
-                    
-                # return jsonify(uniques)
                     
             if query != '' and not query is None:
-            # elif query != '':
                 
                 metadata = {
                     'domaine': domaine,
@@ -817,8 +737,6 @@ def rag_system():
                     'habitation': habitation
                 }
                 
-                uniques = mix.get_metadata_as_dict(articles)
-                
                 retriever, filters, documents, db, embeddings = rag_generator()
 
                 documents = retriever.invoke(query)
@@ -828,7 +746,7 @@ def rag_system():
                 chat_llm = ChatGroq(model=chat_models["sel"].replace("(groq)", "").strip(), temperature=temperature) if "groq" in chat_models["sel"]\
                     else ChatMistralAI(model=chat_models["sel"].replace("(mistral)", "").strip(), temperature=temperature)
                 
-                # envoie de la requête
+                # sending the query to the RAG system
                 response = rag.get_answer(
                     chat_llm,
                     query,
@@ -838,20 +756,11 @@ def rag_system():
                     e_prompt
                 )
                 
-                
-                # data_ = pd.read_csv("Mixtral_8x7B_Instruct_v0.1.csv")
-                    
-                # data_.loc[len(data_)] = [query.replace('\n', '\\n'), response.replace('\n', '\\n'), k, temperature, {key: value for key, value in metadata.items() if value != ''}]
-                
-                # data_.to_csv("Mixtral_8x7B_Instruct_v0.1.csv", index = False)
-                
             else:
                 
-                # uniques = mix.get_metadata_as_dict(articles)
-                
-                response = "Veuillez fournir une requête avant de soumettre !"
+                response = "You must write a query to get an answer from the system !"
             
-            return jsonify({"title": "Réponse du système de RAG", "response":substitute_strong(response.replace('\n', '<br>')),
+            return jsonify({"title": "Answer from the RAG system", "response":substitute_strong(response.replace('\n', '<br>')),
                             "context": [text.replace('\n', '<br>') for text in contexts], "query": query, 
                             "correct": len(contexts) > 0, "result": True, "temperature": temperature, "base_n": base_n, 
                             "bm25_n": bm25_n, "chat_model": chat_models["sel"], 
@@ -861,11 +770,9 @@ def rag_system():
         
         else:
             
-            # uniques = mix.get_metadata_as_dict(articles)
-            return render_template("rag_system.html", result = False, title = "Système de RAG", page = 'rag', base_n = base_n, bm25_n = bm25_n, chat_models = chat_models,
+            return render_template("rag_system.html", result = False, title = "RAG system", page = 'rag', base_n = base_n, bm25_n = bm25_n, chat_models = chat_models,
                                    embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers,
-                                   temperature = temperature, c_prompt = c_prompt, e_prompt = e_prompt,
-                                #    metadata = uniques
+                                   temperature = temperature, c_prompt = c_prompt, e_prompt = e_prompt
                                    )
             
     except Exception as e:
@@ -907,31 +814,10 @@ def agent_system():
     global SEARCH_PROMPT
     global DECISION_PROMPT
     global load
-    
-    # recuperate data for selection
-    articles_ = articles.copy()
      
     try:
         
         if request.method == "POST":
-            
-            # domaine = request.form.get('domaine')
-            # loi = request.form.get('loi')
-            # decret = request.form.get('decret')
-            # arrete = request.form.get('arrete')
-            # declaration = request.form.get('declaration')
-            # partie = request.form.get('partie')
-            # livre = request.form.get('livre')
-            # titre = request.form.get('titre')
-            # sous_titre = request.form.get('sous_titre')
-            # chapitre = request.form.get('chapitre')
-            # section = request.form.get('section')
-            # sous_section = request.form.get('sous_section')
-            # application = request.form.get('application')
-            # loyer = request.form.get('loyer')
-            # localite = request.form.get('localite')
-            # categorie = request.form.get('categorie')
-            # habitation = request.form.get('habitation')
 
             query = request.form.get('query')
             
@@ -992,74 +878,14 @@ def agent_system():
             SEARCH_PROMPT = request.form.get('s_prompt')
             
             DECISION_PROMPT = request.form.get('d_prompt')
-            
-            # if query is None:
-                
-                # articles_.rename(column_map, axis = 1, inplace = True)
-                
-                # articles_ = mix.filter_articles(
-                #     articles_,
-                #     domaine = domaine,
-                #     loi = loi,
-                #     decret = decret,
-                #     arrete = arrete,
-                #     declaration = declaration,
-                #     partie = partie,
-                #     livre = livre,
-                #     titre = titre,
-                #     sous_titre = sous_titre,
-                #     chapitre = chapitre,
-                #     section = section,
-                #     sous_section = sous_section,
-                #     application = application,
-                #     loyer = loyer,
-                #     localite = localite,
-                #     categorie = categorie,
-                #     habitation = habitation
-                # )
-                
-                # uniques = mix.get_metadata_as_dict(articles_)
-                    
-                # return jsonify(uniques)
                     
             if query != '' and not query is None:
-            # elif query != '':
-                
-                metadata = {
-                    'domaine': domaine,
-                    'numero_loi': loi,
-                    'numero_decret': decret,
-                    'numero_arrete': arrete,
-                    'declaration': declaration,
-                    'division_partie': partie,
-                    'division_livre': livre,
-                    'division_titre': titre,
-                    'division_sous_titre': sous_titre,
-                    'division_chapitre': chapitre,
-                    'division_section': section,
-                    'division_sous_section': sous_section,
-                    'application': application,
-                    'loyer': loyer,
-                    'localite': localite,
-                    'categorie': categorie,
-                    'habitation': habitation
-                }
-                
-                uniques = mix.get_metadata_as_dict(articles)
-                
-                # data_ = pd.read_csv("Mixtral_8x7B_Instruct_v0.1.csv")
-                    
-                # data_.loc[len(data_)] = [query.replace('\n', '\\n'), response.replace('\n', '\\n'), k, temperature, {key: value for key, value in metadata.items() if value != ''}]
-                
-                # data_.to_csv("Mixtral_8x7B_Instruct_v0.1.csv", index = False)
                 
                 correct = True
                 
             else:
                 
-                # uniques = mix.get_metadata_as_dict(articles)
-                
-                response = "Veuillez fournir une requête avant de soumettre !"
+                response = "You must write a query to get an answer from the system !"
 
                 correct = False
             
@@ -1067,25 +893,17 @@ def agent_system():
                     {
                         'correct': correct,
                         'result': True,
-                        'title': "Réponse obtenue du système d'agent"
+                        'title': "Answer from the Multi-Agent system"
                     }
             )
-            # return jsonify({
-            #     'title': "Réponse obtenue de l'agent appliqué aux vecteurs",
-            #     'response': response.replace('\n', '<br>'),
-            #     'query': query.replace('\n', '<br>') if not query is None else "",
-            #     'metadata': uniques
-            # })
         
         else:
             
-            # uniques = mix.get_metadata_as_dict(articles)
-            return render_template("agent_system.html", result = False, title = "Système Multi-Agent", page = 'agent', base_n = base_n, bm25_n = bm25_n, max_iter = max_iter, 
+            return render_template("agent_system.html", result = False, title = "Multi-Agent System", page = 'agent', base_n = base_n, bm25_n = bm25_n, max_iter = max_iter, 
                                    temperature = temperature, chat_models = chat_models, tr_models = tr_models,
                                    embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers,
                                    c_prompt = c_prompt, e_prompt = e_prompt,
                                    s_prompt = SEARCH_PROMPT, d_prompt = DECISION_PROMPT,
-                                #    metadata = uniques
                                    )
             
     except Exception as e:
