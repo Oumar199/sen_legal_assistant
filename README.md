@@ -108,7 +108,7 @@ python<version> optimization.py
 @misc{ok2024senlegalassistant,
   title={Sen Legal Assistant},
   author={Oumar Kane},
-  howpublished={https://github.com/Oumar199/fake_face_detection_ViT},
+  howpublished={https://github.com/Oumar199/sen_legal_assistant},
   year={2024}
 }
 ```
