@@ -34,19 +34,49 @@ This project explores the feasibility and implications of creating an artificial
 - The second part indicates the identification number of the image;
 - The third and final part indicates the modified segment of the face in binary digits with the following signature -> $\color{orange}[left\\_eye\\_bit,\space right\\_eye\\_bit,\space nose\\_bit,\space mouth\\_bit]$. The segment is modified if it is the positive bit (1). Otherwise, the segment is not modified.  -->
 
-<!-- ### Installing
+### Requirements
 
-The `fake_face_detection` package contains functions and classes used for making exploration, pre-processing, visualization, training, searching for the best model, etc. It is available, and you install it with the following steps:
+To test our application, you must have Git and Python 3 installed on your computer if you haven't done so already. You can check if Git and Python are installed by typing the following commands in your terminal:
 
-- Type the following command on the console to clone the GitHub repository:
+- For Git:
 ```console
-$ git clone https://github.com/Oumar199/fake_face_detection_ViT.git
+$ git --version
 ```
-- Switch to the cloned directory with the command:
+- For Python:
 ```console
-$ cd fake_face_detection_ViT
+$ python --version
 ```
-- Create a python environment with `virtualenv`:
+
+If they are installed, the terminal will display the corresponding version. If not, you can install Git by following the official documentation available on their site [installation of Git](https://git-scm.com/book/fr/v2/D%C3%A9marrage-rapide-Installation-de-Git). To install the latest version of Python 3, download it from the official site [installation of Python](https://www.python.org/downloads/).
+
+After installing Git, remember to add your GitHub username and password before starting the installation step. Open your terminal and type the following commands:
+
+- Add your name:
+```
+$ git config --global user.name "Your Name"
+```
+- Then add your email:
+```
+$ git config --global user.email "youremail@yourdomain.com"
+```
+
+### Installation
+
+`SenLegalAssistant` is a platform developed with Flask to provide an intelligent legal assistant for Senegalese people. You can install it by following these steps:
+
+- Open your terminal and navigate to the directory where you want to install the application:
+```console
+$ cd path_to_your_directory
+```
+- Type the following command in the terminal to clone the GitHub repository:
+```console
+$ git clone https://github.com/Oumar199/sen_legal_assistant.git
+```
+- Change to the cloned directory with the command:
+```console
+$ cd sen_legal_assistant
+```
+- Create a Python environment with `virtualenv`:
 ```console
 $ pip install --user virtualenv
 $ python<version> -m venv env
@@ -59,14 +89,27 @@ $ .\env\Scripts\activate
 ```console
 $ pip install -r requirements.txt
 ```
-- Install the `fake_face_detection` package with:
-```console
-$ pip install -e fake-face-detection
-```
-- You can deactivate the environment if you finish:
+- You can deactivate the environment once you are finished:
 ```console
 $ deactivate
-```  -->
+```
+
+### Tutorial
+
+#### Execution
+
+Before moving on to the next step regarding the use of the platform, make sure you have Flask installed in your environment. The platform will be accessible via your browser at the following address: `http://127.0.0.1:5000/`. To run the application, type the following commands:
+
+```console
+$ export FLASK_APP=run.py
+$ flask run
+```
+
+Once these commands are executed, you will see the following page displayed:
+
+![Screenshot 2024-12-07 130141](https://github.com/user-attachments/assets/77cc1762-5798-4e67-aac4-ccc26805e28c)
+
+To stop the execution of the platform, simply type `CTRL+C` in your terminal and close it.
 
 <!-- ### Tutorial
 
