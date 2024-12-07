@@ -107,7 +107,7 @@ Replace all occurrences of `# place the token in this area` and `# place the api
 
 #### Execution
 
-Before moving on to the next step regarding the use of the platform, make sure you have Flask installed in your environment. The platform will be accessible via your browser at the following address: `http://127.0.0.1:5000/`. To run the application, type the following commands:
+Before moving on to the next step regarding the use of the platform, make sure you have Flask (see the installation step) installed in your environment. The platform will be accessible via your browser at the following address: `http://127.0.0.1:5000/`. To run the application, type the following commands:
 
 ```console
 $ export FLASK_APP=run.py
