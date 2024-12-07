@@ -591,7 +591,7 @@ def log_generator():
                     
                     break
                 
-                elif node == "Critère d'Erreur :":
+                elif node == "Error Criterion :":
                 
                     log = result[log_offset]
                     
