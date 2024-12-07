@@ -93,12 +93,21 @@ $ pip install -r requirements.txt
 ```console
 $ deactivate
 ```
+- To ensure the proper functioning of the models, you need to add your API keys to the .env file. The file should appear as follows after being opened with your editor:
+
+![Screenshot 2024-12-07 184832](https://github.com/user-attachments/assets/5b9dccd8-83e9-4431-b0cb-a523f471d844)
+
+Replace all occurrences of `# place the token in this area` and `# place the api key in this area` with the corresponding tokens and API keys from the different platforms. You can generate them from the following URLs:
+- for Groq: [groq_api](https://console.groq.com/keys)
+- for Mistral: [mistralai_api](https://console.mistral.ai/api-keys/)
+- for Tavily: [tavily_api](https://tavily.com/)
+- for Hugging Face: [hugging_face](https://huggingface.co/settings/tokens)
 
 ### Tutorial
 
 #### Execution
 
-Before moving on to the next step regarding the use of the platform, make sure you have Flask installed in your environment. The platform will be accessible via your browser at the following address: `http://127.0.0.1:5000/`. To run the application, type the following commands:
+Before moving on to the next step regarding the use of the platform, make sure you have Flask (see the installation step) installed in your environment. The platform will be accessible via your browser at the following address: `http://127.0.0.1:5000/`. To run the application, type the following commands:
 
 ```console
 $ export FLASK_APP=run.py
