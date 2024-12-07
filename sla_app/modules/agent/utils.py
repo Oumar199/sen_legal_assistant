@@ -321,6 +321,43 @@ Formulate an improved question.
 
     return question_rewriter
 
+def get_query_rewriter(llm, sys_prompt=None, human_prompt=None):
+
+    # Prompt template for rewriting
+    SYS_PROMPT = (
+    """Act as a question reformulator and perform the following task:
+- Transform the following input question into an improved version.
+- When reformulating, examine the input question and try to reason about the underlying semantic intent/meaning.
+- The output question must be written in French.
+- Provide only the output question and nothing else.
+"""
+
+        if sys_prompt is None
+        else sys_prompt
+    )
+    HUMAN_PROMPT = (
+        """Here is the initial question:
+{question}
+
+Formulate an improved question.
+"""
+        if human_prompt is None
+        else human_prompt
+    )
+    re_write_prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", SYS_PROMPT),
+            (
+                "human",
+                HUMAN_PROMPT,
+            ),
+        ]
+    )
+    # Create rephraser chain
+    question_rewriter = re_write_prompt | llm | StrOutputParser()
+
+    return question_rewriter
+
 def parse_triples(response, delimiter=KG_TRIPLE_DELIMITER):
     if not response:
         return []
@@ -357,7 +394,7 @@ def web_search(query, search_tool):
         except Exception as e:
             time.sleep(2)
 
-    web_results = "\n\n".join([d["content"] for d in docs])
+    web_results = "\n\n".join([d if isinstance(d, str) else d["content"] for d in docs])
 
     web_results = Document(page_content=web_results)
 
@@ -439,6 +476,7 @@ class AgentSystemv1:
         ref_retriever,
         triples_llm,
         triple_retriever_prompt,
+        query_rewriter,
         query_rewriter_web_search,
         search_tool=None,
         chat_llm=None,
@@ -470,6 +508,8 @@ class AgentSystemv1:
 
         self.triple_retriever_prompt = triple_retriever_prompt
 
+        self.query_rewriter = query_rewriter
+        
         self.query_rewriter_web_search = query_rewriter_web_search
         
         self.log = logs
@@ -566,6 +606,8 @@ class AgentSystemv1:
         self.init_log(node)
         
         query = state["query"]
+        
+        print(query)
 
         docs, perc = retrieve_documents(self.retriever, query, self.filters, True)
 
@@ -1229,6 +1271,26 @@ Web Context => {web_context.page_content}"""
 
     def invoke(self, state, **kwargs):
 
+        while True:
+
+            try:
+
+                query = self.query_rewriter.invoke(state["query"])
+                
+                time.sleep(2)
+
+                break
+
+            except Exception as e:
+
+                time.sleep(2)
+        
+        state["query"] = query
+        
+        self.init_log("")
+        
+        self.update_log(f"New Query => {query}", "#6DD5FA")
+        
         col_print(f"User query => {state['query']}", TextColors.BLUE)
 
         return self.graph.invoke(state, **kwargs)

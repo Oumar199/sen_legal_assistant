@@ -350,7 +350,7 @@ def get_answer(
 ):
 
     qa_rag_chain = get_rag_chain(chat_llm, target=target, c_prompt=c_prompt, e_prompt=e_prompt)
-
+    
     while True:
 
         try:

@@ -136,6 +136,14 @@ SEARCH_PROMPT = """Act as a question reformulator and perform the following task
 - Add more context to the request if necessary.
 """
 
+QUERY_PROMPT = """Act as a question reformulator and perform the following task:
+- Transform the following input question into an improved version.
+- When reformulating, examine the input question and try to reason about the underlying semantic intent/meaning.
+- The output question must be written in French.
+- Provide only the output question and nothing else.
+- Think step by step.
+"""
+
 DECISION_PROMPT = """You are a decision-making expert based on a context obtained from a query.
 Follow these instructions to decide:
 - If the number of reference documents (defined at the end of the context) is strictly greater than 0, if the number of attempts to extract references (defined at the end of the context) does not exceed 3, and the context before the web-extracted context contains any reference to legal articles, laws, decrees, legal textbooks, legal text titles, legal text chapters, legal text sections, legal text subsections, or paragraphs, then return 'references'.
@@ -431,10 +439,15 @@ def chat_generator():
     global targets
     global c_prompt
     global e_prompt
+    global QUERY_PROMPT
     global SEARCH_PROMPT
     global DECISION_PROMPT
     
     print("Entering chat thread")
+    
+    llm_query_rewriter_ = agent.get_query_rewriter(
+        ChatMistralAI(model="open-mistral-nemo"), QUERY_PROMPT
+    )
     
     retriever, filters, documents, db, embeddings = rag_generator()
     
@@ -472,6 +485,7 @@ def chat_generator():
         ref_retriever,
         triples_llm,
         prompt_template,
+        llm_query_rewriter_,
         llm_query_rewriter,
         verbose=verbose,
         chat_llm=chat_model,
@@ -517,6 +531,7 @@ def log_generator():
     global log_offset
     global c_prompt
     global e_prompt
+    global QUERY_PROMPT
     global SEARCH_PROMPT
     global DECISION_PROMPT
     
@@ -542,11 +557,15 @@ def log_generator():
             print(len(result), log_offset, result_offset)
             if len(result) > log_offset:
                 
+                if node == "":
+                    
+                    if len(logs["results"][result_offset]) > 0 : query = logs["results"][result_offset][0]["log"].replace("New Query =>", "").strip()
+                
                 if node == "Final Answer :":
                     
                     log = result[log_offset]
                     
-                    log["log"] = substitute_strong(log["log"].replace("Réponse =>", "").strip())
+                    log["log"] = substitute_strong(log["log"].replace("Answer =>", "").strip())
                     
                     dict_ = {
                         "result": log,
@@ -563,6 +582,7 @@ def log_generator():
                         "reranker": rerankers["sel"],
                         "c_prompt": c_prompt, 
                         "e_prompt": e_prompt,
+                        "q_prompt": QUERY_PROMPT,
                         "s_prompt": SEARCH_PROMPT,
                         "d_prompt": DECISION_PROMPT
                     }
@@ -590,6 +610,7 @@ def log_generator():
                         "reranker": rerankers["sel"],
                         "c_prompt": c_prompt, 
                         "e_prompt": e_prompt,
+                        "q_prompt": QUERY_PROMPT,
                         "s_prompt": SEARCH_PROMPT,
                         "d_prompt": DECISION_PROMPT
                     }
@@ -658,6 +679,7 @@ def rag_system():
     global articles
     global c_prompt
     global e_prompt
+    global QUERY_PROMPT
     global load
     
     # initialize the context
@@ -714,28 +736,28 @@ def rag_system():
             c_prompt = request.form.get('c_prompt')
             
             e_prompt = request.form.get('e_prompt')
+            
+            QUERY_PROMPT = request.form.get('q_prompt')
                     
             if query != '' and not query is None:
                 
-                metadata = {
-                    'domaine': domaine,
-                    'numero_loi': loi,
-                    'numero_decret': decret,
-                    'numero_arrete': arrete,
-                    'declaration': declaration,
-                    'division_partie': partie,
-                    'division_livre': livre,
-                    'division_titre': titre,
-                    'division_sous_titre': sous_titre,
-                    'division_chapitre': chapitre,
-                    'division_section': section,
-                    'division_sous_section': sous_section,
-                    'application': application,
-                    'loyer': loyer,
-                    'localite': localite,
-                    'categorie': categorie,
-                    'habitation': habitation
-                }
+                llm_query_rewriter_ = agent.get_query_rewriter(
+                    ChatMistralAI(model="open-mistral-7b"), QUERY_PROMPT
+                )
+                
+                while True:
+
+                    try:
+
+                        query = llm_query_rewriter_.invoke(query)
+                        
+                        time.sleep(2)
+
+                        break
+
+                    except Exception as e:
+
+                        time.sleep(2)
                 
                 retriever, filters, documents, db, embeddings = rag_generator()
 
@@ -766,13 +788,14 @@ def rag_system():
                             "bm25_n": bm25_n, "chat_model": chat_models["sel"], 
                             "embedding_id": embedding_ids["sel"], "metric": metrics["sel"],
                             "reranker": rerankers["sel"],
-                            "c_prompt": c_prompt, "e_prompt": e_prompt})
+                            "c_prompt": c_prompt, "e_prompt": e_prompt, "q_prompt": QUERY_PROMPT})
         
         else:
             
             return render_template("rag_system.html", result = False, title = "RAG system", page = 'rag', base_n = base_n, bm25_n = bm25_n, chat_models = chat_models,
                                    embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers,
-                                   temperature = temperature, c_prompt = c_prompt, e_prompt = e_prompt
+                                   temperature = temperature, c_prompt = c_prompt, e_prompt = e_prompt,
+                                   q_prompt = QUERY_PROMPT
                                    )
             
     except Exception as e:
@@ -811,6 +834,7 @@ def agent_system():
     global response
     global c_prompt
     global e_prompt
+    global QUERY_PROMPT
     global SEARCH_PROMPT
     global DECISION_PROMPT
     global load
@@ -875,6 +899,8 @@ def agent_system():
             
             e_prompt = request.form.get('e_prompt')
             
+            QUERY_PROMPT = request.form.get('q_prompt')
+            
             SEARCH_PROMPT = request.form.get('s_prompt')
             
             DECISION_PROMPT = request.form.get('d_prompt')
@@ -902,7 +928,7 @@ def agent_system():
             return render_template("agent_system.html", result = False, title = "Multi-Agent System", page = 'agent', base_n = base_n, bm25_n = bm25_n, max_iter = max_iter, 
                                    temperature = temperature, chat_models = chat_models, tr_models = tr_models,
                                    embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers,
-                                   c_prompt = c_prompt, e_prompt = e_prompt,
+                                   c_prompt = c_prompt, e_prompt = e_prompt, q_prompt = QUERY_PROMPT,
                                    s_prompt = SEARCH_PROMPT, d_prompt = DECISION_PROMPT,
                                    )
             

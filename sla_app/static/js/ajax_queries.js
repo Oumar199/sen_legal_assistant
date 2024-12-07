@@ -21,6 +21,7 @@ $(document).ready(function() {
             reranker: $('form select[name="reranker"]').val(),
             c_prompt: $('form textarea[name="c_prompt"]').val(),
             e_prompt: $('form textarea[name="e_prompt"]').val(),
+            q_prompt: $('form textarea[name="q_prompt"]').val(),
         }
         
         console.log(data_obj)
@@ -61,10 +62,14 @@ $(document).ready(function() {
                 $('form textarea[name="c_prompt"]').val(data.c_prompt);
 
                 $('form textarea[name="e_prompt"]').val(data.e_prompt);
+
+                $('form textarea[name="q_prompt"]').val(data.q_prompt);
                 
                 if(data.correct){
 
                     $('.result span').html("")
+                    
+                    $('.result span').html(`New Query: <p class="text-info">${data.query}</p>`)
 
                     data.context.forEach((element, index) => {
                         $('.result span').append(`Document ${index + 1}: <p class="text-success">${element}</p><br>`);
@@ -115,7 +120,7 @@ $(document).ready(function() {
                     nodeText = node
                 }
 
-                if(data.node === "Document Filtering :"){
+                if(data.node === ""){
                     $('.result span').html(`${nodeText}<p class="text-success" style="color:${color}!important">${log}</p><br>`)
                 }
                 else{
@@ -146,6 +151,8 @@ $(document).ready(function() {
                     $('form select[name="metric"]').val(data.metric);
                     
                     $('form select[name="reranker"]').val(data.reranker);
+
+                    $('form textarea[name="q_prompt"]').val(data.q_prompt);
 
                     $('form textarea[name="c_prompt"]').val(data.c_prompt);
                     
@@ -187,6 +194,7 @@ $(document).ready(function() {
             embedding_id: $('form select[name="embedding_id"]').val(),
             metric: $('form select[name="metric"]').val(),
             reranker: $('form select[name="reranker"]').val(),
+            q_prompt: $('form textarea[name="q_prompt"]').val(),
             c_prompt: $('form textarea[name="c_prompt"]').val(),
             e_prompt: $('form textarea[name="e_prompt"]').val(),
             s_prompt: $('form textarea[name="s_prompt"]').val(),
