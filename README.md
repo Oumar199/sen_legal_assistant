@@ -40,11 +40,11 @@ To test our application, you must have Git and Python 3 installed on your comput
 
 - For Git:
 ```console
-$ git --version
+git --version
 ```
 - For Python:
 ```console
-$ python3 --version
+python3 --version
 ```
 
 If they are installed, the terminal will display the corresponding version. If not, you can install Git by following the official documentation available on their site [installation of Git](https://git-scm.com/book/fr/v2/D%C3%A9marrage-rapide-Installation-de-Git). To install the latest version of Python 3, download it from the official site [installation of Python](https://www.python.org/downloads/).
@@ -53,11 +53,11 @@ After installing Git, remember to add your GitHub username and password before s
 
 - Add your name:
 ```
-$ git config --global user.name "Your Name"
+git config --global user.name "Your Name"
 ```
 - Then add your email:
 ```
-$ git config --global user.email "youremail@yourdomain.com"
+git config --global user.email "youremail@yourdomain.com"
 ```
 
 ### Installation
@@ -66,32 +66,32 @@ $ git config --global user.email "youremail@yourdomain.com"
 
 - Open your terminal and navigate to the directory where you want to install the application:
 ```console
-$ cd path_to_your_directory
+cd path_to_your_directory
 ```
 - Type the following command in the terminal to clone the GitHub repository:
 ```console
-$ git clone https://github.com/Oumar199/sen_legal_assistant.git
+git clone https://github.com/Oumar199/sen_legal_assistant.git
 ```
 - Change to the cloned directory with the command:
 ```console
-$ cd sen_legal_assistant
+cd sen_legal_assistant
 ```
 - Create a Python environment with `virtualenv`:
 ```console
-$ pip install --user virtualenv
-$ python3 -m venv env
+pip install --user virtualenv
+python3 -m venv env
 ```
 - Activate the virtual environment:
 ```console
-$ .\env\Scripts\activate
+.\env\Scripts\activate
 ```
 - Install the required libraries in your environment by typing the following command:
 ```console
-$ pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 - You can deactivate the environment once you are finished:
 ```console
-$ deactivate
+deactivate
 ```
 - To ensure the proper functioning of the models, you need to add your API keys to the .env file. The file should appear as follows after being opened with your editor:
 
@@ -110,8 +110,8 @@ Replace all occurrences of `# place the token in this area` and `# place the api
 Before moving on to the next step regarding the use of the platform, make sure you have Flask (see the installation step) installed in your environment. The platform will be accessible via your browser at the following address: `http://127.0.0.1:5000/`. To run the application, type the following commands:
 
 ```console
-$ export FLASK_APP=run.py
-$ flask run
+export FLASK_APP=run.py
+flask run
 ```
 
 Once these commands are executed, you will see the following page displayed:
