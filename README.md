@@ -44,7 +44,7 @@ $ git --version
 ```
 - For Python:
 ```console
-$ python --version
+$ python3 --version
 ```
 
 If they are installed, the terminal will display the corresponding version. If not, you can install Git by following the official documentation available on their site [installation of Git](https://git-scm.com/book/fr/v2/D%C3%A9marrage-rapide-Installation-de-Git). To install the latest version of Python 3, download it from the official site [installation of Python](https://www.python.org/downloads/).
@@ -79,7 +79,7 @@ $ cd sen_legal_assistant
 - Create a Python environment with `virtualenv`:
 ```console
 $ pip install --user virtualenv
-$ python<version> -m venv env
+$ python3 -m venv env
 ```
 - Activate the virtual environment:
 ```console
