@@ -81,9 +81,17 @@ cd sen_legal_assistant
 pip install --user virtualenv
 python3 -m venv env
 ```
-- Activate the virtual environment:
+- Add `~/.local/bin` to your `PATH` if it’s not already included (for Linux or macOS):
+```console
+export PATH="$HOME/.local/bin:$PATH"
+```
+- Activate the virtual environment (for Windows):
 ```console
 .\env\Scripts\activate
+```
+- Activate the virtual environment (for Linux or macOS):
+```console
+source env/bin/activate
 ```
 - Install the required libraries in your environment by typing the following command:
 ```console
