@@ -14,8 +14,8 @@ $(document).ready(function() {
             temperature: $('form input[name="temperature"]').val(),
             base_n: $('form input[name="base_n"]').val(),
             bm25_n: $('form input[name="bm25_n"]').val(),
+            max_retries: $('form input[name="max_retries"]').val(),
             chat_model: $('form select[name="chat_model"]').val(),
-            tr_model: $('form select[name="tr_model"]').val(),
             embedding_id: $('form select[name="embedding_id"]').val(),
             metric: $('form select[name="metric"]').val(),
             reranker: $('form select[name="reranker"]').val(),
@@ -49,9 +49,9 @@ $(document).ready(function() {
 
                 $('form input[name="bm25_n"]').val(data.bm25_n);
 
+                $('form input[name="max_retries"]').val(data.max_retries);
+
                 $('form select[name="chat_model"]').val(data.chat_model);
-                
-                $('form select[name="tr_model"]').val(data.tr_model);
 
                 $('form select[name="embedding_id"]').val(data.embedding_id);
                     
@@ -142,6 +142,45 @@ $(document).ready(function() {
                 
                     $('form input[name="max_iter"]').val(data.max_iter);
 
+                    $('form input[name="max_retries"]').val(data.max_retries);
+
+                    $('form select[name="chat_model"]').val(data.chat_model);
+
+                    $('form select[name="tr_model"]').val(data.tr_model);
+
+                    $('form select[name="embedding_id"]').val(data.embedding_id);
+                    
+                    $('form select[name="metric"]').val(data.metric);
+                    
+                    $('form select[name="reranker"]').val(data.reranker);
+
+                    $('form textarea[name="q_prompt"]').val(data.q_prompt);
+
+                    $('form textarea[name="c_prompt"]').val(data.c_prompt);
+                    
+                    $('form textarea[name="e_prompt"]').val(data.e_prompt);
+
+                    $('form textarea[name="s_prompt"]').val(data.s_prompt);
+                    
+                    $('form textarea[name="d_prompt"]').val(data.d_prompt);
+                }
+                else if(data.node === "Error Criterion :"){
+                    $('#loader').hide();
+
+                    $('.response').html(`<i class="text-danger">${log}</i>`);
+
+                    $('form textarea[name="query"]').val(data.query);
+
+                    $('form input[name="temperature"]').val(data.temperature);
+                    
+                    $('form input[name="base_n"]').val(data.base_n);
+
+                    $('form input[name="bm25_n"]').val(data.bm25_n);
+                
+                    $('form input[name="max_iter"]').val(data.max_iter);
+
+                    $('form input[name="max_retries"]').val(data.max_retries);
+
                     $('form select[name="chat_model"]').val(data.chat_model);
 
                     $('form select[name="tr_model"]').val(data.tr_model);
@@ -189,6 +228,7 @@ $(document).ready(function() {
             base_n: $('form input[name="base_n"]').val(),
             bm25_n: $('form input[name="bm25_n"]').val(),
             max_iter: $('form input[name="max_iter"]').val(),
+            max_retries: $('form input[name="max_retries"]').val(),
             chat_model: $('form select[name="chat_model"]').val(),
             tr_model: $('form select[name="tr_model"]').val(),
             embedding_id: $('form select[name="embedding_id"]').val(),

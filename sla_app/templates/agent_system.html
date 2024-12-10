@@ -45,6 +45,11 @@
                                     </div>
                                     <hr class="hr-blurry">
                                     <div class="form-group">
+                                        <label for="max_retries">Maximum Number of Attempts for API Call</label>
+                                        <input type="number" name="max_retries" class="form-control" placeholder="Number of Attempts" min="10" max="100" value="{{max_retries}}">
+                                    </div>
+                                    <hr class="hr-blurry">
+                                    <div class="form-group">
                                         <label for="chat_model">Conversation Model</label>
                                         <select class="form-select" aria-label="Default select example" name="chat_model">
                                             <option selected value="{{chat_models['sel']}}">{{chat_models['sel']}}</option>

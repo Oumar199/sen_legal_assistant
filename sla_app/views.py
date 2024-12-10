@@ -86,6 +86,7 @@ load = False
 base_n = 7
 bm25_n = 6
 max_iter = 25 
+max_retries = 20
 rerankers = {
     "sel": "antoinelouis/crossencoder-mMiniLMv2-L12-mmarcoFR",
     "nsel": ["antoinelouis/crossencoder-camembert-large-mmarcoFR"]
@@ -146,8 +147,8 @@ QUERY_PROMPT = """Act as a question reformulator and perform the following task:
 
 DECISION_PROMPT = """You are a decision-making expert based on a context obtained from a query.
 Follow these instructions to decide:
-- If the number of reference documents (defined at the end of the context) is strictly greater than 0, if the number of attempts to extract references (defined at the end of the context) does not exceed 3, and the context before the web-extracted context contains any reference to legal articles, laws, decrees, legal textbooks, legal text titles, legal text chapters, legal text sections, legal text subsections, or paragraphs, then return 'references'.
-- Otherwise, if the context contains no references and is not clear enough or if the filtering percentage exceeds 70% and the number of search attempts (defined at the end of the context) does not exceed 3, return 'search'.
+- If the number of reference documents (defined at the beginning of the context) is strictly greater than 0, if the number of attempts to extract references (defined at the beginning of the context) does not exceed 3, and the context before the web-extracted context contains any reference to legal articles, laws, decrees, legal textbooks, legal text titles, legal text chapters, legal text sections, legal text subsections, or paragraphs, then return 'references'.
+- Otherwise, if the context contains no references and is not clear enough or if the filtering percentage exceeds 70% and the number of search attempts (defined at the beginning of the context) does not exceed 3, return 'search'.
 - Otherwise, if the context contains no references but has enough information to answer the request, return 'final_answer'.
 - Be especially careful not to exceed the limits on the number of attempts.
 - Think step by step before providing your decision.
@@ -236,7 +237,6 @@ articles['domaine'] = articles['domaine'].map(lambda x: 'Autres' if x == '' else
 # parameters related to threads
 result_offset = 0
 log_offset = 0
-
 
 @server.route("/")    
 @server.route("/index")    
@@ -442,6 +442,7 @@ def chat_generator():
     global QUERY_PROMPT
     global SEARCH_PROMPT
     global DECISION_PROMPT
+    global max_retries
     
     print("Entering chat thread")
     
@@ -492,17 +493,38 @@ def chat_generator():
         logs=logs,
         c_prompt=c_prompt,
         e_prompt=e_prompt,
-        target=targets["sel"]
+        target=targets["sel"],
+        max_retries=max_retries
     )
     
     # sending the query to the multi-agent system
     try:
         result = agent_system.invoke({"query": query}, config = {'recursion_limit': max_iter})
+        response = result['answer']
     except RecursionError:
-        logs["results"].append([{"log": "Maximum number of iterations reached !", "color": "red"}])
+        logs["results"].append([{"log": "Maximum number of iterations reached ! Try to augment the maximum number of iterations.", "color": "red"}])
         logs["nodes"].append("Error Criterion :")
-    
-    response = result['answer']
+    except rag.RateLimitError as rl:
+        if rl.task == "answer":
+            model = chat_models["sel"]
+            task = "chat"
+        elif rl.task == "triples":
+            model = tr_models["sel"]
+            task = "extraction of triplets"
+        elif rl.task == "query_rewrite_search":
+            model = "Non Specified"
+            task = "rewrite query or question for web search"
+        elif rl.task == "query_rewrite":
+            model = "Non Specified"
+            task = "rewrite query or question"
+        elif rl.task == "references":
+            model = "Non Specified"
+            task = "extraction of references"
+        elif rl.task == "search":
+            model = "Non Specified"
+            task = "web search"
+        logs["results"].append([{"log": f"An API error is occured ! Choose another model for the task '{task}' different from the model {model}.", "color": "red"}])
+        logs["nodes"].append("Error Criterion :")
     
 def log_generator():
     
@@ -534,6 +556,7 @@ def log_generator():
     global QUERY_PROMPT
     global SEARCH_PROMPT
     global DECISION_PROMPT
+    global max_retries
     
     logs["results"] = []
     
@@ -584,7 +607,8 @@ def log_generator():
                         "e_prompt": e_prompt,
                         "q_prompt": QUERY_PROMPT,
                         "s_prompt": SEARCH_PROMPT,
-                        "d_prompt": DECISION_PROMPT
+                        "d_prompt": DECISION_PROMPT,
+                        "max_retries": max_retries
                     }
                     
                     yield f"data: {json.dumps(dict_)}\n\n"
@@ -612,7 +636,8 @@ def log_generator():
                         "e_prompt": e_prompt,
                         "q_prompt": QUERY_PROMPT,
                         "s_prompt": SEARCH_PROMPT,
-                        "d_prompt": DECISION_PROMPT
+                        "d_prompt": DECISION_PROMPT,
+                        "max_retries": max_retries
                     }
                     
                     yield f"data: {json.dumps(dict_)}\n\n"
@@ -681,6 +706,7 @@ def rag_system():
     global e_prompt
     global QUERY_PROMPT
     global load
+    global max_retries
     
     # initialize the context
     contexts = []
@@ -698,6 +724,10 @@ def rag_system():
             bm25_n = request.form.get('bm25_n')
             
             bm25_n = int(bm25_n)
+            
+            max_retries = request.form.get('max_retries')
+            
+            max_retries = int(max_retries)
             
             temperature = request.form.get('temperature')
             
@@ -745,38 +775,45 @@ def rag_system():
                     ChatMistralAI(model="open-mistral-7b"), QUERY_PROMPT
                 )
                 
-                while True:
-
-                    try:
+                try:
+                    
+                    @rag.execute_with_count(max_retries, "query_rewrite")
+                    def execute(query):
 
                         query = llm_query_rewriter_.invoke(query)
                         
-                        time.sleep(2)
+                        return query
+                    
+                    query = execute(query)
+                    
+                    retriever, filters, documents, db, embeddings = rag_generator()
 
-                        break
+                    documents = retriever.invoke(query)
 
-                    except Exception as e:
-
-                        time.sleep(2)
-                
-                retriever, filters, documents, db, embeddings = rag_generator()
-
-                documents = retriever.invoke(query)
-
-                contexts = [doc.page_content for doc in retriever.invoke(query)]
-                
-                chat_llm = ChatGroq(model=chat_models["sel"].replace("(groq)", "").strip(), temperature=temperature) if "groq" in chat_models["sel"]\
-                    else ChatMistralAI(model=chat_models["sel"].replace("(mistral)", "").strip(), temperature=temperature)
-                
-                # sending the query to the RAG system
-                response = rag.get_answer(
-                    chat_llm,
-                    query,
-                    documents,
-                    targets["sel"],
-                    c_prompt,
-                    e_prompt
-                )
+                    contexts = [doc.page_content for doc in retriever.invoke(query)]
+                    
+                    chat_llm = ChatGroq(model=chat_models["sel"].replace("(groq)", "").strip(), temperature=temperature) if "groq" in chat_models["sel"]\
+                        else ChatMistralAI(model=chat_models["sel"].replace("(mistral)", "").strip(), temperature=temperature)
+                    
+                    # sending the query to the RAG system
+                    response = rag.get_answer(
+                        chat_llm,
+                        query,
+                        documents,
+                        targets["sel"],
+                        c_prompt,
+                        e_prompt,
+                        max_retries
+                    )
+                    
+                except rag.RateLimitError as rl:
+                    if rl.task == "query_rewrite":
+                        model = "Non Specified"
+                        task = "rewrite query or question"
+                    elif rl.task == "answer":
+                        model = chat_models["sel"]
+                        task = "chat"
+                    response = f"<i class='text-danger'>An API error occured ! Choose another model for the task '{task}' different from the model {model}.</i>"
                 
             else:
                 
@@ -788,14 +825,14 @@ def rag_system():
                             "bm25_n": bm25_n, "chat_model": chat_models["sel"], 
                             "embedding_id": embedding_ids["sel"], "metric": metrics["sel"],
                             "reranker": rerankers["sel"],
-                            "c_prompt": c_prompt, "e_prompt": e_prompt, "q_prompt": QUERY_PROMPT})
+                            "c_prompt": c_prompt, "e_prompt": e_prompt, "q_prompt": QUERY_PROMPT, "max_retries": max_retries})
         
         else:
             
             return render_template("rag_system.html", result = False, title = "RAG system", page = 'rag', base_n = base_n, bm25_n = bm25_n, chat_models = chat_models,
                                    embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers,
                                    temperature = temperature, c_prompt = c_prompt, e_prompt = e_prompt,
-                                   q_prompt = QUERY_PROMPT
+                                   q_prompt = QUERY_PROMPT, max_retries = max_retries
                                    )
             
     except Exception as e:
@@ -838,6 +875,7 @@ def agent_system():
     global SEARCH_PROMPT
     global DECISION_PROMPT
     global load
+    global max_retries
      
     try:
         
@@ -852,6 +890,10 @@ def agent_system():
             bm25_n = request.form.get('bm25_n')
             
             bm25_n = int(bm25_n)
+            
+            max_retries = request.form.get('max_retries')
+            
+            max_retries = int(max_retries)
             
             max_iter = request.form.get('max_iter')
             
@@ -929,7 +971,7 @@ def agent_system():
                                    temperature = temperature, chat_models = chat_models, tr_models = tr_models,
                                    embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers,
                                    c_prompt = c_prompt, e_prompt = e_prompt, q_prompt = QUERY_PROMPT,
-                                   s_prompt = SEARCH_PROMPT, d_prompt = DECISION_PROMPT,
+                                   s_prompt = SEARCH_PROMPT, d_prompt = DECISION_PROMPT, max_retries = max_retries
                                    )
             
     except Exception as e:

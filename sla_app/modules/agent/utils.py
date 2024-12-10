@@ -1,5 +1,5 @@
 from sla_app.modules.agent import re, ChatMistralAI, TavilySearchResults, DuckDuckGoSearchRun, StateGraph, END, TypedDict, List, Document, Field, BaseModel, time, tqdm, ChatPromptTemplate, PromptTemplate, StrOutputParser, KG_TRIPLE_DELIMITER, ChatGroq
-from sla_app.modules.rag.utils import get_rag_chain
+from sla_app.modules.rag.utils import get_rag_chain, execute_with_count, RateLimitError
 
 # Basic ANSI escape codes for colors
 class TextColors:
@@ -258,10 +258,9 @@ Contexte :
 def get_reference_retriever(ref_llm, parser, template=None):
 
     template = (
-        """
-  Extract all references from the context for which the contents are not specified.
-  {format_instructions}
-  context={context}
+        """Extract all references from the context for which the contents are not specified.
+{format_instructions}
+context={context}
   """
         if template is None
         else template
@@ -382,17 +381,14 @@ def parse_triples(response, delimiter=KG_TRIPLE_DELIMITER):
         for element in matches
     ]
 
-def web_search(query, search_tool):
+def web_search(query, search_tool, max_retries = 10):
 
-    while True:
+    @execute_with_count(max_retries, "search")
+    def execute():
         
-        try:
-            docs = search_tool.invoke(query)
-            time.sleep(2)
-            
-            break
-        except Exception as e:
-            time.sleep(2)
+        docs = search_tool.invoke(query)
+        
+        return docs
 
     web_results = "\n\n".join([d if isinstance(d, str) else d["content"] for d in docs])
 
@@ -486,6 +482,7 @@ class AgentSystemv1:
         logs=None,
         c_prompt=None,
         e_prompt=None,
+        max_retries=10,
     ):
 
         graph = StateGraph(AgentStatev1)
@@ -517,6 +514,8 @@ class AgentSystemv1:
         self.c_prompt = c_prompt
         
         self.e_prompt = e_prompt
+        
+        self.max_retries = max_retries
 
         if not search_tool is None:
             self.search_tool = search_tool
@@ -653,21 +652,21 @@ Documents => {context}"""
         self.init_log(node)
 
         web_context = (
-            f"\n\nWeb Context : {state['web_context'].page_content}"
+            f"\n\nWeb Context -> {state['web_context'].page_content}"
             if not state["web_context"] is None
             else ""
         )
 
         filter_percentage = (
-            f"\n\nFiltering Percentage : {round(state['filter_percentage'], 2)}%"
+            f"\n\nFiltering Percentage -> {round(state['filter_percentage'], 2)}%"
             if not state["filter_percentage"] is None
             else ""
         )
 
         nombre_references = (
-            f"\n\nNumber of reference documents : {len(state['ref_documents'])}"
+            f"\n\nNumber of reference documents -> {len(state['ref_documents'])}"
             if not state["ref_documents"] is None
-            else f"\n\nNumber of reference documents : 0"
+            else f"\n\nNumber of reference documents -> 0"
         )
 
         if state["n_searches"] is None:
@@ -676,30 +675,31 @@ Documents => {context}"""
         if state["n_ref_retrieves"] is None:
             state["n_ref_retrieves"] = 0
 
-        n_searches = f"\n\nNumber of search attempts : {state['n_searches']}"
+        n_searches = f"\n\nNumber of search attempts -> {state['n_searches']}"
 
-        n_ref_retrieves = f"\n\nNumber of reference extraction attempts : {state['n_ref_retrieves']}"
+        n_ref_retrieves = f"\n\nNumber of reference extraction attempts -> {state['n_ref_retrieves']}"
 
         context = (
-            "\n\n".join([doc for doc in retrieve_content(state["documents"])])
-            + web_context
-            + filter_percentage
-            + "\n\n---------------------------------------------"
+            filter_percentage
             + nombre_references
             + n_searches
-            + n_ref_retrieves
+            + n_ref_retrieves 
+            + "\n\n---------------------------------------------\n\n" 
+            + "\n\n".join([f"Document {i + 1} -> {doc}" for i, doc in enumerate(retrieve_content(state["documents"]))])
+            + web_context
         )
 
-        while True:
-            try:
-                decision = self.decider.invoke(
-                    {"context": context, "query": state["query"]}
-                )
-                time.sleep(2)
-                break
-            except Exception as e:
-                time.sleep(2)
+        @execute_with_count(self.max_retries, "decision")
+        def execute():
+        
+            decision = self.decider.invoke(
+                {"context": context, "query": state["query"]}
+            )
+            
+            return decision
 
+        decision = execute()
+        
         decision = decision.decision
 
         if self.verbose:
@@ -772,27 +772,25 @@ Decision => {decision}"""
             
             document = documents[i]
             
-            while True:
-                try:
-                    ref = self.ref_retriever.invoke({"context": document})
-                    
-                    if self.verbose:
-                        
-                        log = f"References extracted from the document {i+1} => {ref}"
-                        # log = f"References for document {i+1} => {ref}"
-                        
-                        col_print(log, TextColors.CYAN)
-                        
-                        self.update_log(log, "#f7b733")
-                        
-                    time.sleep(2)
-                    
-                    references.append(ref)
-                    
-                    break
+            @execute_with_count(self.max_retries, "references")
+            def execute():
+
+                ref = self.ref_retriever.invoke({"context": document})
                 
-                except Exception as e:
-                    time.sleep(2)
+                return ref
+            
+            ref = execute()
+                    
+            if self.verbose:
+                
+                log = f"Références extraites du document {i+1} => {ref}"
+                # log = f"References for document {i+1} => {ref}"
+                
+                col_print(log, TextColors.CYAN)
+                
+                self.update_log(log, "#f7b733")
+                
+            references.append(ref)   
 
         col_print("NODE IS ENDED", TextColors.RED)
 
@@ -848,16 +846,17 @@ Decision => {decision}"""
                 self.update_log("No extractable triples!", "#f7797d")
         
         for i, ref_doc in enumerate(ref_docs_and_extractions):
+            
             get_triples = get_triples_open(self.triples_llm, self.triple_retriever_prompt)
 
-            while True:
-                try:
-                    triples = get_triples(ref_doc)
-                    time.sleep(2)
-                    break
-                except Exception as e:
-                    print(e)
-                    time.sleep(2)
+            @execute_with_count(self.max_retries, "triples")
+            def execute():
+        
+                triples = get_triples(ref_doc)
+                
+                return triples    
+            
+            triples = execute()
 
             if self.verbose:
                 col_print(
@@ -1094,7 +1093,7 @@ Decision => {decision}"""
                         state["documents"][i].page_content = re.compile(
                             re.escape(str.lower(article)), re.IGNORECASE
                         ).sub(
-                            f"{article} (voir Article(s) supplémentaire(s))",
+                            f"{article} (see next Additional article(s))",
                             state["documents"][i].page_content,
                         )
 
@@ -1106,7 +1105,7 @@ Decision => {decision}"""
 
                 if index_change:
 
-                    added = f"Additional article(s) :\n-> {ref_document_no_metadata}"
+                    added = f"\nAdditional article(s) :\n-> {ref_document_no_metadata}"
 
                     distance = 0
 
@@ -1170,21 +1169,16 @@ Reference documents: => {context}"""
         
         self.init_log(node)
 
-        while True:
+        @execute_with_count(self.max_retries, "query_rewrite_search")
+        def execute():
+        
+            new_query = self.query_rewriter_web_search.invoke(state["query"])
 
-            try:
+            return new_query
 
-                new_query = self.query_rewriter_web_search.invoke(state["query"])
-                
-                time.sleep(2)
+        new_query = execute()
 
-                break
-
-            except Exception as e:
-
-                time.sleep(2)
-
-        web_context = web_search(new_query, self.search_tool)
+        web_context = web_search(new_query, self.search_tool, self.max_retries)
 
         web_context.page_content = web_context.page_content.replace("\n\n", "\n")
 
@@ -1235,23 +1229,16 @@ Web Context => {web_context.page_content}"""
             else state["documents"]
         )
 
-        while True:
+        @execute_with_count(self.max_retries, "answer")
+        def execute():
+        
+            answer = self.qa_rag_chain.invoke(
+                {"context": documents, "question": state["query"]}
+            )
+            
+            return answer
 
-            try:
-
-                answer = self.qa_rag_chain.invoke(
-                    {"context": documents, "question": state["query"]}
-                )
-                
-                time.sleep(2)
-
-                break
-
-            except Exception as e:
-                
-                print(e)
-
-                time.sleep(2)
+        answer = execute()
 
         # if self.verbose:
         
@@ -1271,19 +1258,14 @@ Web Context => {web_context.page_content}"""
 
     def invoke(self, state, **kwargs):
 
-        while True:
-
-            try:
-
-                query = self.query_rewriter.invoke(state["query"])
-                
-                time.sleep(2)
-
-                break
-
-            except Exception as e:
-
-                time.sleep(2)
+        @execute_with_count(self.max_retries, "query_rewrite")
+        def execute():
+        
+            query = self.query_rewriter.invoke(state["query"])
+            
+            return query
+        
+        query = execute()
         
         state["query"] = query
         

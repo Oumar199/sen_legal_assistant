@@ -1,5 +1,45 @@
 from sla_app.modules.rag import HuggingFaceEmbeddings, tqdm, pd, RecursiveCharacterTextSplitter, Document, Chroma, LLMChainFilter, EmbeddingsRedundantFilter, BM25Retriever, EnsembleRetriever, MultiQueryRetriever, HuggingFaceCrossEncoder, CrossEncoderReranker, DocumentCompressorPipeline, ContextualCompressionRetriever, RunnableLambda, itemgetter, time, ChatPromptTemplate, StrOutputParser, faiss, FAISS, InMemoryDocstore, os
 
+class RateLimitError(Exception):
+    
+    def __init__(self, task):
+        
+        print(f"Error for the task {task} ! The API's limits are maybe obsolete")
+        
+        self.task = task
+
+def execute_with_count(max_count, task):  
+        
+    def execution_decorator(func):
+        
+        def wrapper(*args, **kwargs):
+            
+            count = 0
+            
+            while True:
+                
+                try:
+                    
+                    value = func(*args, **kwargs)
+                    
+                    time.sleep(2)
+                    
+                    return value
+                
+                except:
+                    
+                    if count > max_count:
+                        
+                        raise RateLimitError(task)
+
+                    time.sleep(2)
+                    
+                    count += 1
+            
+        return wrapper
+    
+    return execution_decorator
+
 def get_embedding(id):
 
     model = HuggingFaceEmbeddings(model_name=id)
@@ -29,9 +69,9 @@ def insert_metadata(document, before=False, add_contextual_container=False):
             contextual_container = f" de l'arrêté ministériel {x['numero_arrete']}"
 
     if not before:
-        contenu += f"""Contenu de l'article numéro {x['numero_article']}{contextual_container} : {x['contenu']}\n"""
+        contenu += f"""Content of the article number {x['numero_article']}{contextual_container} : {x['contenu']}\n"""
 
-    contenu += f"Références : Code juridique = {x['code']}; "
+    contenu += f"References : Code juridique = {x['code']}; "
     if "domaine" in x and x["domaine"] != "":
         contenu += f"Domaine = {x['domaine']}; "
     if "date_signature" in x and x["date_signature"] != "":
@@ -346,27 +386,22 @@ def get_answer(
     documents,
     target = "citizen",
     c_prompt = None,
-    e_prompt = None
+    e_prompt = None,
+    max_retries = 10,
 ):
 
     qa_rag_chain = get_rag_chain(chat_llm, target=target, c_prompt=c_prompt, e_prompt=e_prompt)
     
-    while True:
+    @execute_with_count(max_retries, "answer")
+    def execute():
+        # send query
+        answer = qa_rag_chain.invoke(
+            {"context": documents, "question": query}
+        )
+        
+        return answer
 
-        try:
-
-            # send query
-            answer = qa_rag_chain.invoke(
-                {"context": documents, "question": query}
-            )
-
-            break
-
-        except:
-
-            time.sleep(2)
-
-    return answer
+    return execute()
 
 def get_rag_chain(chat_llm, target="citizen", c_prompt = None, e_prompt = None):
 
