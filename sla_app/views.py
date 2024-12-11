@@ -578,71 +578,73 @@ def log_generator():
             node = logs["nodes"][result_offset]
             
             print(len(result), log_offset, result_offset)
-            if len(result) > log_offset:
+            if len(result) >= log_offset:
                 
-                if node == "":
-                    
-                    if len(logs["results"][result_offset]) > 0 : query = logs["results"][result_offset][0]["log"].replace("New Query =>", "").strip()
+                if len(result) > 0:
                 
-                if node == "Final Answer :":
+                    if node == "":
+                        
+                        if len(result) > 0 : query = result[0]["log"].replace("New Query =>", "").strip()
                     
-                    log = result[log_offset]
+                    if node == "Final Answer :":
+                        
+                        log = result[log_offset]
+                        
+                        log["log"] = substitute_strong(log["log"].replace("Answer =>", "").strip())
+                        
+                        dict_ = {
+                            "result": log,
+                            "node": node,
+                            "query": query,
+                            "temperature": temperature,
+                            "base_n": base_n,
+                            "bm25_n": bm25_n,
+                            "max_iter": max_iter,
+                            "chat_model": chat_models["sel"],
+                            "tr_model": tr_models["sel"],
+                            "embedding_id": embedding_ids["sel"],
+                            "metric": metrics["sel"],
+                            "reranker": rerankers["sel"],
+                            "c_prompt": c_prompt, 
+                            "e_prompt": e_prompt,
+                            "q_prompt": QUERY_PROMPT,
+                            "s_prompt": SEARCH_PROMPT,
+                            "d_prompt": DECISION_PROMPT,
+                            "max_retries": max_retries
+                        }
+                        
+                        yield f"data: {json.dumps(dict_)}\n\n"
+                        
+                        break
                     
-                    log["log"] = substitute_strong(log["log"].replace("Answer =>", "").strip())
+                    elif node == "Error Criterion :":
                     
-                    dict_ = {
-                        "result": log,
-                        "node": node,
-                        "query": query,
-                        "temperature": temperature,
-                        "base_n": base_n,
-                        "bm25_n": bm25_n,
-                        "max_iter": max_iter,
-                        "chat_model": chat_models["sel"],
-                        "tr_model": tr_models["sel"],
-                        "embedding_id": embedding_ids["sel"],
-                        "metric": metrics["sel"],
-                        "reranker": rerankers["sel"],
-                        "c_prompt": c_prompt, 
-                        "e_prompt": e_prompt,
-                        "q_prompt": QUERY_PROMPT,
-                        "s_prompt": SEARCH_PROMPT,
-                        "d_prompt": DECISION_PROMPT,
-                        "max_retries": max_retries
-                    }
-                    
-                    yield f"data: {json.dumps(dict_)}\n\n"
-                    
-                    break
-                
-                elif node == "Error Criterion :":
-                
-                    log = result[log_offset]
-                    
-                    dict_ = {
-                        "result": log,
-                        "node": node,
-                        "query": query,
-                        "temperature": temperature,
-                        "base_n": base_n,
-                        "bm25_n": bm25_n,
-                        "max_iter": max_iter,
-                        "chat_model": chat_models["sel"],
-                        "tr_model": tr_models["sel"],
-                        "embedding_id": embedding_ids["sel"],
-                        "metric": metrics["sel"],
-                        "reranker": rerankers["sel"],
-                        "c_prompt": c_prompt, 
-                        "e_prompt": e_prompt,
-                        "q_prompt": QUERY_PROMPT,
-                        "s_prompt": SEARCH_PROMPT,
-                        "d_prompt": DECISION_PROMPT,
-                        "max_retries": max_retries
-                    }
-                    
-                    yield f"data: {json.dumps(dict_)}\n\n"
-                    
-                    break
+                        log = result[log_offset]
+                        
+                        dict_ = {
+                            "result": log,
+                            "node": node,
+                            "query": query,
+                            "temperature": temperature,
+                            "base_n": base_n,
+                            "bm25_n": bm25_n,
+                            "max_iter": max_iter,
+                            "chat_model": chat_models["sel"],
+                            "tr_model": tr_models["sel"],
+                            "embedding_id": embedding_ids["sel"],
+                            "metric": metrics["sel"],
+                            "reranker": rerankers["sel"],
+                            "c_prompt": c_prompt, 
+                            "e_prompt": e_prompt,
+                            "q_prompt": QUERY_PROMPT,
+                            "s_prompt": SEARCH_PROMPT,
+                            "d_prompt": DECISION_PROMPT,
+                            "max_retries": max_retries
+                        }
+                        
+                        yield f"data: {json.dumps(dict_)}\n\n"
+                        
+                        break
             
                 if log_offset + 1 < len(result):
                     
@@ -657,12 +659,13 @@ def log_generator():
                     
                 elif len(logs["results"]) > result_offset + 1:
                     
-                    dict_ = {
-                        "result": result[log_offset],
-                        "node": node
-                    }
+                    if len(result) > 0:
+                        dict_ = {
+                            "result": result[log_offset],
+                            "node": node
+                        }
                     
-                    yield f"data: {json.dumps(dict_)}\n\n"
+                        yield f"data: {json.dumps(dict_)}\n\n"
                     
                     result_offset += 1
                     

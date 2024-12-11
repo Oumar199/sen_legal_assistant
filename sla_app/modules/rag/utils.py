@@ -58,15 +58,15 @@ def insert_metadata(document, before=False, add_contextual_container=False):
 
         if "numero_decret" in x and x["numero_decret"] != "":
 
-            contextual_container = f" du décret {x['numero_decret']}"
+            contextual_container = f" of décret {x['numero_decret']}"
 
         elif "numero_loi" in x and x["numero_loi"] != "":
 
-            contextual_container = f" de la loi {x['numero_loi']}"
+            contextual_container = f" of loi {x['numero_loi']}"
 
         elif "numero_arrete" in x and x["numero_arrete"] != "":
 
-            contextual_container = f" de l'arrêté ministériel {x['numero_arrete']}"
+            contextual_container = f" of arrêté ministériel {x['numero_arrete']}"
 
     if not before:
         contenu += f"""Content of the article number {x['numero_article']}{contextual_container} : {x['contenu']}\n"""

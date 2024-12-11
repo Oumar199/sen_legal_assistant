@@ -390,6 +390,8 @@ def web_search(query, search_tool, max_retries = 10):
         
         return docs
 
+    docs = execute()
+    
     web_results = "\n\n".join([d if isinstance(d, str) else d["content"] for d in docs])
 
     web_results = Document(page_content=web_results)
