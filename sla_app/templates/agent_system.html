@@ -38,6 +38,10 @@
                                         <label for="bm25_n">Number of Recoveries (BM25)</label>
                                         <input type="number" name="bm25_n" class="form-control" placeholder="Number of Recoveries" min="2" max="15" value="{{bm25_n}}">
                                     </div>
+                                    <div class="form-group">
+                                        <label for="base_weight">Weight to grant to the Similarity Retriever</label>
+                                        <input id="base_weight" name="base_weight" type="number" class="form-control" placeholder="Similarity Retriever's Weight" step=".01" min=".01" max="1" value="{{base_weight}}">
+                                    </div>
                                     <hr class="hr-blurry">
                                     <div class="form-group">
                                         <label for="max_iter">Maximum Number of Iterations</label>
@@ -50,7 +54,17 @@
                                     </div>
                                     <hr class="hr-blurry">
                                     <div class="form-group">
-                                        <label for="chat_model">Conversation Model</label>
+                                        <label for="target">Target People</label>
+                                        <select class="form-select" aria-label="Default select example" name="target">
+                                            <option selected value="{{targets['sel']}}">{{targets['sel']}}</option>
+                                            {% for option in targets['nsel'] %}
+                                            <option value="{{option}}">{{option}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <hr class="hr-blurry">
+                                    <div class="form-group">
+                                        <label for="chat_model">Chat Model</label>
                                         <select class="form-select" aria-label="Default select example" name="chat_model">
                                             <option selected value="{{chat_models['sel']}}">{{chat_models['sel']}}</option>
                                             {% for option in chat_models['nsel'] %}

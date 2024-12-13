@@ -93,7 +93,7 @@ rerankers = {
 }
 add_hybrid_search = True
 multiple_query_llm = None
-base_weight = 0.8127024224401845
+base_weight = 0.8
 metadata_positions = {
     "sel": "after",
     "nsel": ["before", "none"]
@@ -105,8 +105,8 @@ metrics = {
 verbose = True
 temperature = 0.4
 chat_models = {
-    "sel": "llama-3.1-70b-versatile (groq)",
-    "nsel": ["mistral-large-latest (mistral)", "llama-3.1-8b-instant (groq)", "mixtral-8x7b-32768 (groq)",
+    "sel": "mistral-large-latest (mistral)",
+    "nsel": ["llama-3.1-70b-versatile (groq)", "llama-3.1-8b-instant (groq)", "mixtral-8x7b-32768 (groq)",
              "open-mistral-nemo (mistral)", "open-mistral-7b (mistral)", "open-mixtral-8x22b (mistral)"]
 }
 tr_models = {
@@ -118,7 +118,7 @@ response = ""
 # other hyperparameters
 targets = {
     "sel": "citizen",
-    "nsel": ["citizen", "expert"]
+    "nsel": ["expert"]
 }
 
 # initialize prompts
@@ -541,6 +541,7 @@ def log_generator():
     global base_weight
     global metadata_positions
     global metrics
+    global targets
     global verbose
     global temperature
     global chat_models
@@ -599,7 +600,9 @@ def log_generator():
                             "temperature": temperature,
                             "base_n": base_n,
                             "bm25_n": bm25_n,
+                            "base_weight": base_weight,
                             "max_iter": max_iter,
+                            "target": targets["sel"],
                             "chat_model": chat_models["sel"],
                             "tr_model": tr_models["sel"],
                             "embedding_id": embedding_ids["sel"],
@@ -629,6 +632,8 @@ def log_generator():
                             "base_n": base_n,
                             "bm25_n": bm25_n,
                             "max_iter": max_iter,
+                            "base_weight": base_weight,
+                            "target": targets["sel"],
                             "chat_model": chat_models["sel"],
                             "tr_model": tr_models["sel"],
                             "embedding_id": embedding_ids["sel"],
@@ -653,13 +658,14 @@ def log_generator():
                         "node": node
                     }
                 
-                    log_offset += 1
-                    
                     yield f"data: {json.dumps(dict_)}\n\n"
+                    
+                    log_offset += 1
                     
                 elif len(logs["results"]) > result_offset + 1:
                     
                     if len(result) > 0:
+                        
                         dict_ = {
                             "result": result[log_offset],
                             "node": node
@@ -735,6 +741,14 @@ def rag_system():
             temperature = request.form.get('temperature')
             
             temperature = float(temperature)
+            
+            base_weight = request.form.get('base_weight')
+            
+            base_weight = float(base_weight)
+            
+            target = request.form.get('target')
+            
+            targets = add_selection(target, targets)
             
             chat_model = request.form.get('chat_model')
             
@@ -824,17 +838,17 @@ def rag_system():
             
             return jsonify({"title": "Answer from the RAG system", "response":substitute_strong(response.replace('\n', '<br>')),
                             "context": [text.replace('\n', '<br>') for text in contexts], "query": query, 
-                            "correct": len(contexts) > 0, "result": True, "temperature": temperature, "base_n": base_n, 
+                            "correct": len(contexts) > 0, "result": True, "temperature": temperature, "base_weight": base_weight, "base_n": base_n, 
                             "bm25_n": bm25_n, "chat_model": chat_models["sel"], 
                             "embedding_id": embedding_ids["sel"], "metric": metrics["sel"],
-                            "reranker": rerankers["sel"],
+                            "reranker": rerankers["sel"], "target": targets["sel"],
                             "c_prompt": c_prompt, "e_prompt": e_prompt, "q_prompt": QUERY_PROMPT, "max_retries": max_retries})
         
         else:
             
             return render_template("rag_system.html", result = False, title = "RAG system", page = 'rag', base_n = base_n, bm25_n = bm25_n, chat_models = chat_models,
-                                   embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers,
-                                   temperature = temperature, c_prompt = c_prompt, e_prompt = e_prompt,
+                                   embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers, targets = targets,
+                                   temperature = temperature, base_weight = base_weight, c_prompt = c_prompt, e_prompt = e_prompt,
                                    q_prompt = QUERY_PROMPT, max_retries = max_retries
                                    )
             
@@ -868,6 +882,7 @@ def agent_system():
     global metadata_positions
     global metrics
     global verbose
+    global targets
     global temperature
     global chat_models
     global tr_models
@@ -905,6 +920,14 @@ def agent_system():
             temperature = request.form.get('temperature')
             
             temperature = float(temperature)
+            
+            base_weight = request.form.get('base_weight')
+            
+            base_weight = float(base_weight)
+            
+            target = request.form.get('target')
+            
+            targets = add_selection(target, targets)
             
             chat_model = request.form.get('chat_model')
             
@@ -971,7 +994,7 @@ def agent_system():
         else:
             
             return render_template("agent_system.html", result = False, title = "Multi-Agent System", page = 'agent', base_n = base_n, bm25_n = bm25_n, max_iter = max_iter, 
-                                   temperature = temperature, chat_models = chat_models, tr_models = tr_models,
+                                   temperature = temperature, base_weight = base_weight, chat_models = chat_models, tr_models = tr_models, targets = targets,
                                    embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers,
                                    c_prompt = c_prompt, e_prompt = e_prompt, q_prompt = QUERY_PROMPT,
                                    s_prompt = SEARCH_PROMPT, d_prompt = DECISION_PROMPT, max_retries = max_retries

@@ -12,10 +12,12 @@ $(document).ready(function() {
         data_obj = {
             query: $('form textarea[name="query"]').val(),
             temperature: $('form input[name="temperature"]').val(),
+            base_weight: $('form input[name="base_weight"]').val(),
             base_n: $('form input[name="base_n"]').val(),
             bm25_n: $('form input[name="bm25_n"]').val(),
             max_retries: $('form input[name="max_retries"]').val(),
             chat_model: $('form select[name="chat_model"]').val(),
+            target: $('form select[name="target"]').val(),
             embedding_id: $('form select[name="embedding_id"]').val(),
             metric: $('form select[name="metric"]').val(),
             reranker: $('form select[name="reranker"]').val(),
@@ -44,12 +46,16 @@ $(document).ready(function() {
                 $('form textarea[name="query"]').val(data.query);
                 
                 $('form input[name="temperature"]').val(data.temperature);
+
+                $('form input[name="base_weight"]').val(data.base_weight);
                 
                 $('form input[name="base_n"]').val(data.base_n);
 
                 $('form input[name="bm25_n"]').val(data.bm25_n);
 
                 $('form input[name="max_retries"]').val(data.max_retries);
+
+                $('form select[name="target"]').val(data.target);
 
                 $('form select[name="chat_model"]').val(data.chat_model);
 
@@ -136,6 +142,8 @@ $(document).ready(function() {
 
                     $('form input[name="temperature"]').val(data.temperature);
                     
+                    $('form input[name="base_weight"]').val(data.base_weight);
+                    
                     $('form input[name="base_n"]').val(data.base_n);
 
                     $('form input[name="bm25_n"]').val(data.bm25_n);
@@ -143,6 +151,8 @@ $(document).ready(function() {
                     $('form input[name="max_iter"]').val(data.max_iter);
 
                     $('form input[name="max_retries"]').val(data.max_retries);
+
+                    $('form select[name="target"]').val(data.target);
 
                     $('form select[name="chat_model"]').val(data.chat_model);
 
@@ -172,6 +182,8 @@ $(document).ready(function() {
                     $('form textarea[name="query"]').val(data.query);
 
                     $('form input[name="temperature"]').val(data.temperature);
+
+                    $('form input[name="base_weight"]').val(data.base_weight);
                     
                     $('form input[name="base_n"]').val(data.base_n);
 
@@ -180,6 +192,8 @@ $(document).ready(function() {
                     $('form input[name="max_iter"]').val(data.max_iter);
 
                     $('form input[name="max_retries"]').val(data.max_retries);
+
+                    $('form select[name="target"]').val(data.target);
 
                     $('form select[name="chat_model"]').val(data.chat_model);
 
@@ -225,10 +239,12 @@ $(document).ready(function() {
         data_obj = {
             query: $('form textarea[name="query"]').val(),
             temperature: $('form input[name="temperature"]').val(),
+            base_weight: $('form input[name="base_weight"]').val(),
             base_n: $('form input[name="base_n"]').val(),
             bm25_n: $('form input[name="bm25_n"]').val(),
             max_iter: $('form input[name="max_iter"]').val(),
             max_retries: $('form input[name="max_retries"]').val(),
+            chat_model: $('form select[name="target"]').val(),
             chat_model: $('form select[name="chat_model"]').val(),
             tr_model: $('form select[name="tr_model"]').val(),
             embedding_id: $('form select[name="embedding_id"]').val(),
