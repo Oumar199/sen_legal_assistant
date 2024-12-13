@@ -361,8 +361,9 @@ def rag_generator():
         embedding_ids["sel"]
     )
     
-    base_n = base_n
-    bm25_n = bm25_n
+    base_n = int(base_n)
+    bm25_n = int(bm25_n)
+    base_weight = float(base_weight)
     reranker = rerankers["sel"]
     if reranker != "none":
         rerank = False

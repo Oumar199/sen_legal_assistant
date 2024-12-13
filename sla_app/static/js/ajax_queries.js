@@ -261,10 +261,6 @@ $(document).ready(function() {
             data : data_obj,
             type : 'POST',
             url : '/agent_system/',
-            complete: function() {
-                // Hide the loader when the request is complete
-                startAgentEventStream()
-            },
             success: function (data){
                 console.log(data)
 
@@ -274,10 +270,17 @@ $(document).ready(function() {
 
                     $('.result span').html("In waiting for a response ...");
 
+                    startAgentEventStream()
+
                 }
                 else{
 
+                    // Hide the loader
+                    $('#loader').hide();
+
                     $('.result span').html("No response available at the moment.");
+
+                    $('.response').html(data.response);
 
                 }
             },
