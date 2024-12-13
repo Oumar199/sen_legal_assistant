@@ -393,7 +393,8 @@ def rag_generator():
         add_contextual_container=True,
     )
     
-    db = rag.get_faiss_vectorstore(documents, embeddings, metric = metrics["sel"], load=load)
+    # db = rag.get_faiss_vectorstore(documents, embeddings, metric = metrics["sel"], load=load)
+    db = rag.get_chroma_vectorstore(documents, embeddings, metric = metrics["sel"])
     
     base_retriever = rag.get_document_extractor(db, n=base_n)  # semantic_similarity retriever
     
@@ -806,9 +807,9 @@ def rag_system():
                     
                     retriever, filters, documents, db, embeddings = rag_generator()
 
-                    documents = retriever.invoke(query)
+                    docs = agent.retrieve_documents(retriever, query, filters, False)
 
-                    contexts = [doc.page_content for doc in retriever.invoke(query)]
+                    contexts = [doc.page_content for doc in docs]
                     
                     chat_llm = ChatGroq(model=chat_models["sel"].replace("(groq)", "").strip(), temperature=temperature) if "groq" in chat_models["sel"]\
                         else ChatMistralAI(model=chat_models["sel"].replace("(mistral)", "").strip(), temperature=temperature)

@@ -16,7 +16,7 @@ langchain-huggingface
 sentence-transformers
 transformers
 datasets
-langchain-chroma==0.1.1
+langchain-chroma==0.1.2
 langchainhub
 langgraph==0.1.1
 pinecone==3.2.2
