@@ -18,12 +18,11 @@
                     <textarea class="form-control" name="query" placeholder="Can public land in Senegal be used for agricultural or community projects?"></textarea>
                     <div class="text-center">
                         <div class="row" style="text-align:center;">
-                            <div class="col-md-3 offset-md-3">
-                                <button type="submit" class="btn btn-primary" href="#">Send</button>
-                            </div>
-                            <div class="col-md-3">
-                                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#exampleModalLong">Settings</button>
-                            </div>
+                            <div class="col-md-4 offset-md-4"><button type="submit" class="btn btn-primary" href="#">Send</button></div>
+                         </div>
+                        <div class="row" style="text-align:center;">
+                            <div class="col-md-3 offset-md-3"><button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#settings">Settings</button></div>
+                            <div class="col-md-3 offset-md-0"><button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#metadata">Metadata</button></div>
                         </div>
                     </div>
                     <div id="exampleModalLong" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
@@ -128,6 +127,255 @@
                                     <div class="modal-footer"><button class="btn btn-primary" data-bs-dismiss="modal" type="button">Save</button></div>
                                     </div>
                                     </div>
+                                    </div>
+                                    <div id="metadata" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 id="exampleModalLongTitle" class="modal-title">Metadata</h5>
+                                                    <button class="btn btn-tertiary p-1 mb-3" id="reset-meta" style="margin-left:15rem" type="button">Reset Metadata</button>
+                                                    <button class="close" aria-label="Close" data-bs-dismiss="modal" type="button" style="margin-left:1rem">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label for="code">Legal Code</label>
+                                                        <select class="form-select" aria-label="Default select example" name="code">
+                                                            {% for d in metadata.code %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ d }}" selected>{{ d }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ d }}">{{ d }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="domaine">Domain</label>
+                                                        <select class="form-select" aria-label="Default select example" name="domaine">
+                                                            {% for d in metadata.domaine %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ d }}" selected>{{ d }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ d }}">{{ d }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="loi">Law Number</label>
+                                                        <select class="form-select" aria-label="Default select example" name="loi">
+                                                            {% for nl in metadata.numero_loi %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ nl }}" selected>{{ nl }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ nl }}">{{ nl }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="decret">Decree Number</label>
+                                                        <select class="form-select" aria-label="Default select example" name="decret">
+                                                            {% for nd in metadata.numero_decret %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ nd }}" selected>{{ nd }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ nd }}">{{ nd }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="arrete">Order Number</label>
+                                                        <select class="form-select" aria-label="Default select example" name="arrete">
+                                                            {% for na in metadata.numero_arrete %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ na }}" selected>{{ na }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ na }}">{{ na }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="declaration">Presence in a Declaration</label>
+                                                        <select class="form-select" aria-label="Default select example" name="declaration">
+                                                            {% for dec in metadata.declaration %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ dec }}" selected>{{ dec }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ dec }}">{{ dec }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="partie">Subdivision Part</label>
+                                                        <select class="form-select" aria-label="Default select example" name="partie">
+                                                            {% for dp in metadata.division_partie %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ dp }}" selected>{{ dp }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ dp }}">{{ dp }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="livre">Subdivision Book</label>
+                                                        <select class="form-select" aria-label="Default select example" name="livre">
+                                                            {% for dl in metadata.division_livre %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ dl }}" selected>{{ dl }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ dl }}">{{ dl }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="titre">Subdivision Title</label>
+                                                        <select class="form-select" aria-label="Default select example" name="titre">
+                                                            {% for dt in metadata.division_titre %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ dt }}" selected>{{ dt }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ dt }}">{{ dt }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="sous_titre">Subdivision Subtitle</label>
+                                                        <select class="form-select" aria-label="Default select example" name="sous_titre">
+                                                            {% for dst in metadata.division_sous_titre %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ dst }}" selected>{{ dst }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ dst }}">{{ dst }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="chapitre">Subdivision Chapter</label>
+                                                        <select class="form-select" aria-label="Default select example" name="chapitre">
+                                                            {% for dc in metadata.division_chapitre %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ dc }}" selected>{{ dc }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ dc }}">{{ dc }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="section">Subdivision Section</label>
+                                                        <select class="form-select" aria-label="Default select example" name="section">
+                                                            {% for dsec in metadata.division_section %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ dsec }}" selected>{{ dsec }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ dsec }}">{{ dsec }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="sous_section">Subdivision Subsection</label>
+                                                        <select class="form-select" aria-label="Default select example" name="sous_section">
+                                                            {% for dss in metadata.division_sous_section %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ dss }}" selected>{{ dss }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ dss }}">{{ dss }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="paragraphe">Subdivision Paragraph</label>
+                                                        <select class="form-select" aria-label="Default select example" name="paragraphe">
+                                                            {% for dp in metadata.division_paragraphe %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ dp }}" selected>{{ dp }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ dp }}">{{ dp }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="loyer">Inherence to Rent Prices</label>
+                                                        <select class="form-select" aria-label="Default select example" name="loyer">
+                                                            {% for lo in metadata.loyer %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ lo }}" selected>{{ lo }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ lo }}">{{ lo }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="localite">Locality</label>
+                                                        <select class="form-select" aria-label="Default select example" name="localite">
+                                                            {% for loc in metadata.localite %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ loc }}" selected>{{ loc }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ loc }}">{{ loc }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="categorie">Rental Category</label>
+                                                        <select class="form-select" aria-label="Default select example" name="categorie">
+                                                            {% for cat in metadata.categorie %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ cat }}" selected>{{ cat }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ cat }}">{{ cat }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <hr class="hr-blurry">
+                                                    <div class="form-group">
+                                                        <label for="habitation">Type of Housing</label>
+                                                        <select class="form-select" aria-label="Default select example" name="habitation">
+                                                            {% for th in metadata.type_habitation %}
+                                                                {% if loop.first %}
+                                                                    <option value="{{ th }}" selected>{{ th }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ th }}">{{ th }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer"><button class="btn btn-primary" data-bs-dismiss="modal" type="button">Save</button></div>
+                                            </div>
+                                        </div>
                                     </div>
                                     
                     </div>

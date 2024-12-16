@@ -1,5 +1,163 @@
 $(document).ready(function() {
     
+    // ----------------------------------------------------------------------------------------
+    
+    var data_obj_none = {
+        domaine : "",
+        loi : "",
+        decret : "",
+        arrete : "",
+        declaration : "",
+        partie : "",
+        livre : "",
+        titre : "",
+        sous_titre : "",
+        chapitre : "",
+        section : "",
+        sous_section : "",
+        loyer : "",
+        localite : "",
+        categorie : "",
+        habitation : "",
+        code : ""
+    }
+    
+    $('#rag-form #reset-meta').on('click', function(e){
+        
+
+        $.ajax({
+            data : data_obj_none,
+            type : 'POST',
+            url : '/rag_system/'
+        })
+        .done(function (data){
+            console.log(data)
+            const keys = Object.keys(data)
+            
+            keys.forEach(key => {
+                
+                $(`#rag-form #metadata select[name="${key}"]`).empty()
+                
+                data[key].forEach((element, i) => {
+                    
+                    let newOption = "";
+                    if (element == data_obj[key]){
+                        newOption = $(`<option selected></option>`)
+                                .attr('value', element)
+                                .text(element);
+                    }
+                    else{
+                        newOption = $('<option></option>')
+                                .attr('value', element)
+                                .text(element);
+                    }
+    
+                    $(`#rag-form #metadata select[name="${key}"]`).append(newOption)
+                });
+                
+            });
+            
+        });
+        e.preventDefault();
+        
+    })
+
+    $('#agent-form #reset-meta').on('click', function(e){
+
+        $.ajax({
+            data : data_obj_none,
+            type : 'POST',
+            url : '/agent_system/'
+        })
+        .done(function (data){
+            console.log(data)
+            const keys = Object.keys(data)
+            
+            keys.forEach(key => {
+                
+                $(`#agent-form #metadata select[name="${key}"]`).empty()
+                
+                data[key].forEach((element, i) => {
+                    
+                    let newOption = "";
+                    if (element == data_obj[key]){
+                        newOption = $(`<option selected></option>`)
+                                .attr('value', element)
+                                .text(element);
+                    }
+                    else{
+                        newOption = $('<option></option>')
+                                .attr('value', element)
+                                .text(element);
+                    }
+    
+                    $(`#agent-form #metadata select[name="${key}"]`).append(newOption)
+                });
+                
+            });
+            
+        });
+        e.preventDefault();
+        
+    })
+
+    $('#rag-form #metadata select').on('change', function(e){
+        data_obj = {
+            domaine : $('#metadata select[name="domaine"]').val(),
+            loi : $('#metadata select[name="loi"]').val(),
+            decret : $('#metadata select[name="decret"]').val(),
+            arrete : $('#metadata select[name="arrete"]').val(),
+            declaration : $('#metadata select[name="declaration"]').val(),
+            partie : $('#metadata select[name="partie"]').val(),
+            livre : $('#metadata select[name="livre"]').val(),
+            titre : $('#metadata select[name="titre"]').val(),
+            sous_titre : $('#metadata select[name="sous_titre"]').val(),
+            chapitre : $('#metadata select[name="chapitre"]').val(),
+            section : $('#metadata select[name="section"]').val(),
+            sous_section : $('#metadata select[name="sous_section"]').val(),
+            loyer : $('#metadata select[name="loyer"]').val(),
+            localite : $('#metadata select[name="localite"]').val(),
+            categorie : $('#metadata select[name="categorie"]').val(),
+            habitation : $('#metadata select[name="habitation"]').val(),
+            code : $('#metadata select[name="code"]').val()
+        }
+
+        $.ajax({
+            data : data_obj,
+            type : 'POST',
+            url : '/rag_system/'
+        })
+        .done(function (data){
+            console.log(data)
+            const keys = Object.keys(data)
+            
+            keys.forEach(key => {
+                
+                $(`#rag-form #metadata select[name="${key}"]`).empty()
+                
+                data[key].forEach((element, i) => {
+                    
+                    let newOption = "";
+                    if (element == data_obj[key]){
+                        newOption = $(`<option selected></option>`)
+                                .attr('value', element)
+                                .text(element);
+                    }
+                    else{
+                        newOption = $('<option></option>')
+                                .attr('value', element)
+                                .text(element);
+                    }
+    
+                    $(`#rag-form #metadata select[name="${key}"]`).append(newOption)
+                });
+                
+            });
+            
+        });
+        e.preventDefault();
+        
+    })
 
     $('#rag-form button[type="submit"]').on('click', function(e){
         
@@ -10,6 +168,24 @@ $(document).ready(function() {
         $('.result span').html("In waiting for a response ...")
 
         data_obj = {
+            domaine : $('#metadata select[name="domaine"]').val(),
+            loi : $('#metadata select[name="loi"]').val(),
+            decret : $('#metadata select[name="decret"]').val(),
+            arrete : $('#metadata select[name="arrete"]').val(),
+            declaration : $('#metadata select[name="declaration"]').val(),
+            partie : $('#metadata select[name="partie"]').val(),
+            livre : $('#metadata select[name="livre"]').val(),
+            titre : $('#metadata select[name="titre"]').val(),
+            sous_titre : $('#metadata select[name="sous_titre"]').val(),
+            chapitre : $('#metadata select[name="chapitre"]').val(),
+            section : $('#metadata select[name="section"]').val(),
+            sous_section : $('#metadata select[name="sous_section"]').val(),
+            paragraphe : $('#metadata select[name="paragraphe"]').val(),
+            loyer : $('#metadata select[name="loyer"]').val(),
+            localite : $('#metadata select[name="localite"]').val(),
+            categorie : $('#metadata select[name="categorie"]').val(),
+            habitation : $('#metadata select[name="habitation"]').val(),
+            code : $('#metadata select[name="code"]').val(),
             query: $('form textarea[name="query"]').val(),
             temperature: $('form input[name="temperature"]').val(),
             base_weight: $('form input[name="base_weight"]').val(),
@@ -228,6 +404,64 @@ $(document).ready(function() {
         }
     }
 
+    $('#agent-form #metadata select').on('change', function(e){
+        data_obj = {
+            domaine : $('#metadata select[name="domaine"]').val(),
+            loi : $('#metadata select[name="loi"]').val(),
+            decret : $('#metadata select[name="decret"]').val(),
+            arrete : $('#metadata select[name="arrete"]').val(),
+            declaration : $('#metadata select[name="declaration"]').val(),
+            partie : $('#metadata select[name="partie"]').val(),
+            livre : $('#metadata select[name="livre"]').val(),
+            titre : $('#metadata select[name="titre"]').val(),
+            sous_titre : $('#metadata select[name="sous_titre"]').val(),
+            chapitre : $('#metadata select[name="chapitre"]').val(),
+            section : $('#metadata select[name="section"]').val(),
+            sous_section : $('#metadata select[name="sous_section"]').val(),
+            loyer : $('#metadata select[name="loyer"]').val(),
+            localite : $('#metadata select[name="localite"]').val(),
+            categorie : $('#metadata select[name="categorie"]').val(),
+            habitation : $('#metadata select[name="habitation"]').val(),
+            code : $('#metadata select[name="code"]').val()
+        }
+
+        $.ajax({
+            data : data_obj,
+            type : 'POST',
+            url : '/agent_system/'
+        })
+        .done(function (data){
+            console.log(data)
+            const keys = Object.keys(data)
+            
+            keys.forEach(key => {
+                
+                $(`#agent-form #metadata select[name="${key}"]`).empty()
+                
+                data[key].forEach((element, i) => {
+                    
+                    let newOption = "";
+                    if (element == data_obj[key]){
+                        newOption = $(`<option selected></option>`)
+                                .attr('value', element)
+                                .text(element);
+                    }
+                    else{
+                        newOption = $('<option></option>')
+                                .attr('value', element)
+                                .text(element);
+                    }
+    
+                    $(`#agent-form #metadata select[name="${key}"]`).append(newOption)
+                });
+                
+            });
+            
+        });
+        e.preventDefault();
+        
+    })
+
     $('#agent-form button[type="submit"]').on('click', function(e){
         
         // Show the loader
@@ -237,6 +471,24 @@ $(document).ready(function() {
         $('.result span').html("In waiting for a response ...")
 
         data_obj = {
+            domaine : $('#metadata select[name="domaine"]').val(),
+            loi : $('#metadata select[name="loi"]').val(),
+            decret : $('#metadata select[name="decret"]').val(),
+            arrete : $('#metadata select[name="arrete"]').val(),
+            declaration : $('#metadata select[name="declaration"]').val(),
+            partie : $('#metadata select[name="partie"]').val(),
+            livre : $('#metadata select[name="livre"]').val(),
+            titre : $('#metadata select[name="titre"]').val(),
+            sous_titre : $('#metadata select[name="sous_titre"]').val(),
+            chapitre : $('#metadata select[name="chapitre"]').val(),
+            section : $('#metadata select[name="section"]').val(),
+            sous_section : $('#metadata select[name="sous_section"]').val(),
+            paragraphe : $('#metadata select[name="paragraphe"]').val(),
+            loyer : $('#metadata select[name="loyer"]').val(),
+            localite : $('#metadata select[name="localite"]').val(),
+            categorie : $('#metadata select[name="categorie"]').val(),
+            habitation : $('#metadata select[name="habitation"]').val(),
+            code : $('#metadata select[name="code"]').val(),
             query: $('form textarea[name="query"]').val(),
             temperature: $('form input[name="temperature"]').val(),
             base_weight: $('form input[name="base_weight"]').val(),

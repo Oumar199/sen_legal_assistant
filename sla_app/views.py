@@ -1,17 +1,34 @@
-from flask import render_template, request, jsonify, session, Response, Flask, stream_with_context
+from flask import render_template, request, jsonify, url_for, session, Response, Flask, stream_with_context, send_from_directory, current_app
 from sla_app.modules.rag import ChatGroq, ChatMistralAI
 from sla_app.modules.agent import PydanticOutputParser
+from langchain.prompts import PromptTemplate
 import sla_app.modules.agent.utils as agent
+import sla_app.modules.mixtral.utils as mix
+from werkzeug.utils import secure_filename
 import sla_app.modules.rag.utils as rag
+from langchain_openai import ChatOpenAI
 from flask_session import Session
 from sla_app import app as server
 from dotenv import load_dotenv
+from mistralai import Mistral
+import concurrent.futures
+from PIL import Image
 import pandas as pd
+import pdfplumber
 import threading
+import datetime
+import shutil
 import time
 import json
+import csv
+import ast
 import re
 import os # pour la clé de l'api
+# from flask_wtf import FlaskForm
+# from wtforms import FileField, SubmitField
+# from wtforms.validators import DataRequired
+
+_ = load_dotenv()
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -190,23 +207,51 @@ sous_titre = ""
 chapitre = ""
 section = ""
 sous_section = ""
-application = ""
 loyer = ""
 localite = ""
 categorie = ""
 habitation = ""
+code = ""
+paragraphe = ""
+
+metadata = {
+    'domaine': domaine,
+    'numero_loi': loi,
+    'numero_decret': decret,
+    'numero_arrete': arrete,
+    'declaration': declaration,
+    'division_partie': partie,
+    'division_livre': livre,
+    'division_titre': titre,
+    'division_sous_titre': sous_titre,
+    'division_chapitre': chapitre,
+    'division_section': section,
+    'division_sous_section': sous_section,
+    'division_paragraphe': paragraphe,
+    'loyer': loyer,
+    'localite': localite,
+    'categorie': categorie,
+    'habitation': habitation,
+    'code': code
+}
+
+# concatenating legal documents
+dataframes = []
+
+for file in src_files_list:
+    
+    dataframes.append(pd.read_csv(file))
 
 # recuperate data for metadata filtering
-articles = pd.read_csv('sla_app/data/articles.csv')
+articles = pd.concat(dataframes, ignore_index=True)
 
 # main columns
 columns = ['domaine', 'numero_loi', 'numero_decret', 'numero_arrete',
-            'declaration', 'division_partie', 'division_livre',
-            'division_titre', 'division_sous_titre', 'division_chapitre',
-            'division_section', 'division_sous_section', 'section_application',
-            'loyer', 'localite', 'categorie',
-            'type_habitation'
-        ]
+       'declaration', 'division_partie', 'division_livre', 'division_titre',
+       'division_sous_titre', 'division_chapitre', 'division_section',
+       'division_sous_section', 'loyer',
+       'localite', 'categorie', 'type_habitation', 'code', 'division_paragraphe'
+    ]
 
 # column_map
 column_map = {
@@ -220,14 +265,17 @@ column_map = {
     'division_chapitre': 'chapitre',
     'division_section': 'section',
     'division_sous_section': 'sous_section',
-    'section_application': 'application',
-    'type_habitation': 'habitation'
+    'division_paragraphe': 'paragraphe',
+    'type_habitation': 'habitation',
 }
 
 articles = articles[columns]
 
-articles['declaration'] = articles['declaration'].map(lambda x: ['non', 'oui'][x])
-articles['loyer'] = articles['loyer'].map(lambda x: ['non', 'oui'][x])
+articles['declaration'] = articles['declaration'].fillna(0)
+articles['loyer'] = articles['loyer'].fillna(0)
+
+articles['declaration'] = articles['declaration'].map(lambda x: ['non', 'oui'][int(x)])
+articles['loyer'] = articles['loyer'].map(lambda x: ['non', 'oui'][int(x)])
 
 articles.fillna('', inplace = True)
 
@@ -341,6 +389,7 @@ def rag_generator():
     global metadata_positions
     global metrics
     global load
+    global metadata
     
     print("Entering rag context generation")
     
@@ -393,10 +442,10 @@ def rag_generator():
         add_contextual_container=True,
     )
     
-    # db = rag.get_faiss_vectorstore(documents, embeddings, metric = metrics["sel"], load=load)
-    db = rag.get_chroma_vectorstore(documents, embeddings, metric = metrics["sel"])
+    db = rag.get_faiss_vectorstore(documents, embeddings, metric = metrics["sel"], load=load)
+    # db = rag.get_chroma_vectorstore(documents, embeddings, metric = metrics["sel"])
     
-    base_retriever = rag.get_document_extractor(db, n=base_n)  # semantic_similarity retriever
+    base_retriever = rag.get_document_extractor(db, n=base_n, metadata = metadata)  # semantic_similarity retriever
     
     retriever, filters = rag.get_base_retriever_and_filters(
         filter_llm,
@@ -496,7 +545,7 @@ def chat_generator():
         c_prompt=c_prompt,
         e_prompt=e_prompt,
         target=targets["sel"],
-        max_retries=max_retries
+        max_retries=int(max_retries)
     )
     
     # sending the query to the multi-agent system
@@ -718,6 +767,10 @@ def rag_system():
     global QUERY_PROMPT
     global load
     global max_retries
+    global metadata
+    
+    # copy metadata dataframe
+    articles_ = articles.copy()
     
     # initialize the context
     contexts = []
@@ -726,69 +779,146 @@ def rag_system():
         
         if request.method == "POST":
 
-            query = request.form.get('query')
+            domaine = request.form.get('domaine')
+            loi = request.form.get('loi')
+            decret = request.form.get('decret')
+            arrete = request.form.get('arrete')
+            declaration = request.form.get('declaration')
+            partie = request.form.get('partie')
+            livre = request.form.get('livre')
+            titre = request.form.get('titre')
+            sous_titre = request.form.get('sous_titre')
+            chapitre = request.form.get('chapitre')
+            section = request.form.get('section')
+            sous_section = request.form.get('sous_section')
+            paragraphe = request.form.get('paragraphe')
+            loyer = request.form.get('loyer')
+            localite = request.form.get('localite')
+            categorie = request.form.get('categorie')
+            habitation = request.form.get('habitation')
+            code = request.form.get('code')
             
-            base_n = request.form.get('base_n')
-            
-            base_n = int(base_n)
-            
-            bm25_n = request.form.get('bm25_n')
-            
-            bm25_n = int(bm25_n)
-            
-            max_retries = request.form.get('max_retries')
-            
-            max_retries = int(max_retries)
-            
-            temperature = request.form.get('temperature')
-            
-            temperature = float(temperature)
-            
-            base_weight = request.form.get('base_weight')
-            
-            base_weight = float(base_weight)
-            
-            target = request.form.get('target')
-            
-            targets = add_selection(target, targets)
-            
-            chat_model = request.form.get('chat_model')
-            
-            chat_models = add_selection(chat_model, chat_models)
-            
-            embedding_id = request.form.get('embedding_id')
-            
-            embedding_ids = add_selection(embedding_id, embedding_ids)
-            
-            metric = request.form.get('metric')
-            
-            metrics = add_selection(metric, metrics)
-            
-            if not session.get("metric") and not session.get("embedding_id"):
+            try:
+                query = request.form.get('query')
                 
-                session["metric"] = metrics["sel"]
+                base_n = request.form.get('base_n')
                 
-                session["embedding_id"] = embedding_ids["sel"]
+                base_n = int(base_n)
                 
-            elif metrics["sel"] == session.get("metric") and embedding_ids["sel"] == session.get("embedding_id"):
+                bm25_n = request.form.get('bm25_n')
                 
-                load = True
-            
-            else:
+                bm25_n = int(bm25_n)
                 
-                load = False
-            
-            reranker = request.form.get('reranker')
-            
-            rerankers = add_selection(reranker, rerankers)
-            
-            c_prompt = request.form.get('c_prompt')
-            
-            e_prompt = request.form.get('e_prompt')
-            
-            QUERY_PROMPT = request.form.get('q_prompt')
+                max_retries = request.form.get('max_retries')
+                
+                max_retries = int(max_retries)
+                
+                temperature = request.form.get('temperature')
+                
+                temperature = float(temperature)
+                
+                base_weight = request.form.get('base_weight')
+                
+                base_weight = float(base_weight)
+                
+                target = request.form.get('target')
+                
+                targets = add_selection(target, targets)
+                
+                chat_model = request.form.get('chat_model')
+                
+                chat_models = add_selection(chat_model, chat_models)
+                
+                embedding_id = request.form.get('embedding_id')
+                
+                embedding_ids = add_selection(embedding_id, embedding_ids)
+                
+                metric = request.form.get('metric')
+                
+                metrics = add_selection(metric, metrics)
+                
+                if not session.get("metric") and not session.get("embedding_id"):
                     
-            if query != '' and not query is None:
+                    session["metric"] = metrics["sel"]
+                    
+                    session["embedding_id"] = embedding_ids["sel"]
+                    
+                elif metrics["sel"] == session.get("metric") and embedding_ids["sel"] == session.get("embedding_id"):
+                    
+                    load = True
+                
+                else:
+                    
+                    load = False
+                
+                reranker = request.form.get('reranker')
+                
+                rerankers = add_selection(reranker, rerankers)
+                
+                c_prompt = request.form.get('c_prompt')
+                
+                e_prompt = request.form.get('e_prompt')
+                
+                QUERY_PROMPT = request.form.get('q_prompt')
+            
+            except:
+                
+                pass
+            
+            if query is None:
+                
+                articles_.rename(column_map, axis = 1, inplace = True)
+                
+                articles_ = mix.filter_articles(
+                    articles_,
+                    domaine = domaine,
+                    loi = loi,
+                    decret = decret,
+                    arrete = arrete,
+                    declaration = declaration,
+                    partie = partie,
+                    livre = livre,
+                    titre = titre,
+                    sous_titre = sous_titre,
+                    chapitre = chapitre,
+                    section = section,
+                    sous_section = sous_section,
+                    paragraphe = paragraphe,
+                    loyer = loyer,
+                    localite = localite,
+                    categorie = categorie,
+                    habitation = habitation,
+                    code = code
+                )
+                  
+                uniques = mix.get_metadata_as_dict(articles_)
+                    
+                return jsonify(uniques)
+                
+            if query != '':
+                
+                metadata = {
+                    'domaine': domaine,
+                    'numero_loi': loi,
+                    'numero_decret': decret,
+                    'numero_arrete': arrete,
+                    'declaration': declaration,
+                    'division_partie': partie,
+                    'division_livre': livre,
+                    'division_titre': titre,
+                    'division_sous_titre': sous_titre,
+                    'division_chapitre': chapitre,
+                    'division_section': section,
+                    'division_sous_section': sous_section,
+                    'division_paragraphe': paragraphe,
+                    'loyer': loyer,
+                    'localite': localite,
+                    'categorie': categorie,
+                    'habitation': habitation,
+                    'code': code
+                }
+                
+                uniques = mix.get_metadata_as_dict(articles_)
                 
                 llm_query_rewriter_ = agent.get_query_rewriter(
                     ChatMistralAI(model="open-mistral-7b"), QUERY_PROMPT
@@ -822,7 +952,7 @@ def rag_system():
                         targets["sel"],
                         c_prompt,
                         e_prompt,
-                        max_retries
+                        int(max_retries)
                     )
                     
                 except rag.RateLimitError as rl:
@@ -836,6 +966,8 @@ def rag_system():
                 
             else:
                 
+                uniques = mix.get_metadata_as_dict(articles_)
+                
                 response = "You must write a query to get an answer from the system !"
             
             return jsonify({"title": "Answer from the RAG system", "response":substitute_strong(response.replace('\n', '<br>')),
@@ -848,10 +980,12 @@ def rag_system():
         
         else:
             
+            uniques = mix.get_metadata_as_dict(articles_)
             return render_template("rag_system.html", result = False, title = "RAG system", page = 'rag', base_n = base_n, bm25_n = bm25_n, chat_models = chat_models,
                                    embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers, targets = targets,
                                    temperature = temperature, base_weight = base_weight, c_prompt = c_prompt, e_prompt = e_prompt,
-                                   q_prompt = QUERY_PROMPT, max_retries = max_retries
+                                   q_prompt = QUERY_PROMPT, max_retries = max_retries,
+                                   metadata = uniques
                                    )
             
     except Exception as e:
@@ -896,90 +1030,174 @@ def agent_system():
     global DECISION_PROMPT
     global load
     global max_retries
+    global metadata
      
+    # recuperate data for selection
+    articles_ = articles.copy()
+    
     try:
         
         if request.method == "POST":
 
-            query = request.form.get('query')
+            domaine = request.form.get('domaine')
+            loi = request.form.get('loi')
+            decret = request.form.get('decret')
+            arrete = request.form.get('arrete')
+            declaration = request.form.get('declaration')
+            partie = request.form.get('partie')
+            livre = request.form.get('livre')
+            titre = request.form.get('titre')
+            sous_titre = request.form.get('sous_titre')
+            chapitre = request.form.get('chapitre')
+            section = request.form.get('section')
+            sous_section = request.form.get('sous_section')
+            paragraphe = request.form.get('paragraphe')
+            loyer = request.form.get('loyer')
+            localite = request.form.get('localite')
+            categorie = request.form.get('categorie')
+            habitation = request.form.get('habitation')
+            code = request.form.get('code')
             
-            base_n = request.form.get('base_n')
-            
-            base_n = int(base_n)
-            
-            bm25_n = request.form.get('bm25_n')
-            
-            bm25_n = int(bm25_n)
-            
-            max_retries = request.form.get('max_retries')
-            
-            max_retries = int(max_retries)
-            
-            max_iter = request.form.get('max_iter')
-            
-            max_iter = int(max_iter)
-            
-            temperature = request.form.get('temperature')
-            
-            temperature = float(temperature)
-            
-            base_weight = request.form.get('base_weight')
-            
-            base_weight = float(base_weight)
-            
-            target = request.form.get('target')
-            
-            targets = add_selection(target, targets)
-            
-            chat_model = request.form.get('chat_model')
-            
-            chat_models = add_selection(chat_model, chat_models)
-            
-            tr_model = request.form.get('tr_model')
-            
-            tr_models = add_selection(tr_model, tr_models)
-            
-            embedding_id = request.form.get('embedding_id')
-            
-            embedding_ids = add_selection(embedding_id, embedding_ids)
-            
-            metric = request.form.get('metric')
-            
-            metrics = add_selection(metric, metrics)
-            
-            if not session.get("metric") and not session.get("embedding_id"):
+            try:
                 
-                session["metric"] = metrics["sel"]
+                query = request.form.get('query')
                 
-                session["embedding_id"] = embedding_ids["sel"]
+                base_n = request.form.get('base_n')
                 
-            elif metrics["sel"] == session.get("metric") and embedding_ids["sel"] == session.get("embedding_id"):
+                base_n = int(base_n)
                 
-                load = True
-            
-            else:
+                bm25_n = request.form.get('bm25_n')
                 
-                load = False
-            
-            reranker = request.form.get('reranker')
-            
-            rerankers = add_selection(reranker, rerankers)
-            
-            c_prompt = request.form.get('c_prompt')
-            
-            e_prompt = request.form.get('e_prompt')
-            
-            QUERY_PROMPT = request.form.get('q_prompt')
-            
-            SEARCH_PROMPT = request.form.get('s_prompt')
-            
-            DECISION_PROMPT = request.form.get('d_prompt')
+                bm25_n = int(bm25_n)
+                
+                max_retries = request.form.get('max_retries')
+                
+                max_retries = int(max_retries)
+                
+                max_iter = request.form.get('max_iter')
+                
+                max_iter = int(max_iter)
+                
+                temperature = request.form.get('temperature')
+                
+                temperature = float(temperature)
+                
+                base_weight = request.form.get('base_weight')
+                
+                base_weight = float(base_weight)
+                
+                target = request.form.get('target')
+                
+                targets = add_selection(target, targets)
+                
+                chat_model = request.form.get('chat_model')
+                
+                chat_models = add_selection(chat_model, chat_models)
+                
+                tr_model = request.form.get('tr_model')
+                
+                tr_models = add_selection(tr_model, tr_models)
+                
+                embedding_id = request.form.get('embedding_id')
+                
+                embedding_ids = add_selection(embedding_id, embedding_ids)
+                
+                metric = request.form.get('metric')
+                
+                metrics = add_selection(metric, metrics)
+                
+                if not session.get("metric") and not session.get("embedding_id"):
                     
-            if query != '' and not query is None:
+                    session["metric"] = metrics["sel"]
+                    
+                    session["embedding_id"] = embedding_ids["sel"]
+                    
+                elif metrics["sel"] == session.get("metric") and embedding_ids["sel"] == session.get("embedding_id"):
+                    
+                    load = True
+                
+                else:
+                    
+                    load = False
+                
+                reranker = request.form.get('reranker')
+                
+                rerankers = add_selection(reranker, rerankers)
+                
+                c_prompt = request.form.get('c_prompt')
+                
+                e_prompt = request.form.get('e_prompt')
+                
+                QUERY_PROMPT = request.form.get('q_prompt')
+                
+                SEARCH_PROMPT = request.form.get('s_prompt')
+                
+                DECISION_PROMPT = request.form.get('d_prompt')
+            
+            except:
+                
+                pass
+            
+            if query is None:
+                
+                articles_.rename(column_map, axis = 1, inplace = True)
+                
+                articles_ = mix.filter_articles(
+                    articles_,
+                    domaine = domaine,
+                    loi = loi,
+                    decret = decret,
+                    arrete = arrete,
+                    declaration = declaration,
+                    partie = partie,
+                    livre = livre,
+                    titre = titre,
+                    sous_titre = sous_titre,
+                    chapitre = chapitre,
+                    section = section,
+                    sous_section = sous_section,
+                    paragraphe = paragraphe,
+                    loyer = loyer,
+                    localite = localite,
+                    categorie = categorie,
+                    habitation = habitation,
+                    code = code
+                )
+                  
+                uniques = mix.get_metadata_as_dict(articles_)
+                    
+                return jsonify(uniques)
+              
+            if query != '':
+                
+                metadata = {
+                    'domaine': domaine,
+                    'numero_loi': loi,
+                    'numero_decret': decret,
+                    'numero_arrete': arrete,
+                    'declaration': declaration,
+                    'division_partie': partie,
+                    'division_livre': livre,
+                    'division_titre': titre,
+                    'division_sous_titre': sous_titre,
+                    'division_chapitre': chapitre,
+                    'division_section': section,
+                    'division_sous_section': sous_section,
+                    'division_paragraphe': paragraphe,
+                    'loyer': loyer,
+                    'localite': localite,
+                    'categorie': categorie,
+                    'habitation': habitation,
+                    'code': code
+                }
+                
+                uniques = mix.get_metadata_as_dict(articles_)
                 
                 correct = True
                 
             else:
+                
+                uniques = mix.get_metadata_as_dict(articles_)
                 
                 response = "You must write a query to get an answer from the system !"
 
@@ -989,17 +1207,20 @@ def agent_system():
                     {
                         'correct': correct,
                         'result': True,
-                        'title': "Answer from the Multi-Agent system"
+                        'title': "Answer from the Multi-Agent system",
+                        "metadata": uniques
                     }
             )
         
         else:
             
+            uniques = mix.get_metadata_as_dict(articles_)
             return render_template("agent_system.html", result = False, title = "Multi-Agent System", page = 'agent', base_n = base_n, bm25_n = bm25_n, max_iter = max_iter, 
                                    temperature = temperature, base_weight = base_weight, chat_models = chat_models, tr_models = tr_models, targets = targets,
                                    embedding_ids = embedding_ids, metrics = metrics, rerankers = rerankers,
                                    c_prompt = c_prompt, e_prompt = e_prompt, q_prompt = QUERY_PROMPT,
-                                   s_prompt = SEARCH_PROMPT, d_prompt = DECISION_PROMPT, max_retries = max_retries
+                                   s_prompt = SEARCH_PROMPT, d_prompt = DECISION_PROMPT, max_retries = max_retries,
+                                   metadata = uniques
                                    )
             
     except Exception as e:
