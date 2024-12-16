@@ -63,7 +63,7 @@ $(document).ready(function() {
     })
 
     $('#agent-form #reset-meta').on('click', function(e){
-
+        console.log("Here")
         $.ajax({
             data : data_obj_none,
             type : 'POST',

@@ -282,9 +282,41 @@ articles.fillna('', inplace = True)
 # change domaine value '' to 'Autres'
 articles['domaine'] = articles['domaine'].map(lambda x: 'Autres' if x == '' else x)
 
-# parameters related to threads
+
 result_offset = 0
+app.config['RESULT_OFFSET'] = result_offset
 log_offset = 0
+app.config['LOG_OFFSET'] = log_offset 
+app.config['LOGS'] = logs  
+app.config['N_LOGS'] = n_logs  
+app.config['QUERY'] = query  
+app.config['CHUNK_SIZES'] = chunk_sizes  
+app.config['EMBEDDING_IDS'] = embedding_ids  
+app.config['BASE_N'] = base_n  
+app.config['BM25_N'] = bm25_n  
+app.config['MAX_ITER'] = max_iter  # Included from the second block  
+app.config['RERANKERS'] = rerankers  
+app.config['ADD_HYBRID_SEARCH'] = add_hybrid_search  
+app.config['MULTIPLE_QUERY_LLM'] = multiple_query_llm  
+app.config['BASE_WEIGHT'] = base_weight  
+app.config['METADATA_POSITIONS'] = metadata_positions  
+app.config['METRICS'] = metrics  
+app.config['VERBOSE'] = verbose  
+app.config['TEMPERATURE'] = temperature  
+app.config['CHAT_MODELS'] = chat_models  
+app.config['TR_MODELS'] = tr_models  # Added from the second block  
+app.config['RESPONSE'] = response  
+app.config['TARGETS'] = targets  
+app.config['REF_TEMPLATE'] = ref_template  
+app.config['ARTICLES'] = articles  
+app.config['C_PROMPT'] = c_prompt  
+app.config['E_PROMPT'] = e_prompt  
+app.config['QUERY_PROMPT'] = QUERY_PROMPT  
+app.config['SEARCH_PROMPT'] = SEARCH_PROMPT  # Added from the second block  
+app.config['DECISION_PROMPT'] = DECISION_PROMPT  # Added from the second block  
+app.config['LOAD'] = load  
+app.config['MAX_RETRIES'] = max_retries  
+app.config['METADATA'] = metadata
 
 @server.route("/")    
 @server.route("/index")    
@@ -380,16 +412,17 @@ def substitute_strong(text):
 
 def rag_generator():
     
-    global base_n
-    global bm25_n
-    global rerankers
-    global add_hybrid_search
-    global multiple_query_llm
-    global base_weight
-    global metadata_positions
-    global metrics
-    global load
-    global metadata
+    # Retrieve hyperparameters from app.config  
+    base_n = app.config['BASE_N']  
+    bm25_n = app.config['BM25_N']  
+    rerankers = app.config['RERANKERS']  
+    add_hybrid_search = app.config['ADD_HYBRID_SEARCH']  
+    multiple_query_llm = app.config['MULTIPLE_QUERY_LLM']  
+    base_weight = app.config['BASE_WEIGHT']  
+    metadata_positions = app.config['METADATA_POSITIONS']  
+    metrics = app.config['METRICS']  
+    load = app.config['LOAD']  # Assuming this key exists in your config  
+    metadata = app.config['METADATA']  
     
     print("Entering rag context generation")
     
@@ -467,33 +500,34 @@ def rag_generator():
     
 def chat_generator():
     
-    # initialize some hyperparameters
-    global logs
-    global query
-    global chunk_sizes
-    global embedding_ids
-    global base_n
-    global bm25_n
-    global max_iter
-    global rerankers
-    global add_hybrid_search
-    global multiple_query_llm
-    global base_weight
-    global metadata_positions
-    global metrics
-    global verbose
-    global temperature
-    global chat_models
-    global tr_models
-    global response
-    global ref_template
-    global targets
-    global c_prompt
-    global e_prompt
-    global QUERY_PROMPT
-    global SEARCH_PROMPT
-    global DECISION_PROMPT
-    global max_retries
+    # Retrieve hyperparameters from app.config  
+    logs = app.config['LOGS']  
+    query = app.config['QUERY']  
+    chunk_sizes = app.config['CHUNK_SIZES']  
+    embedding_ids = app.config['EMBEDDING_IDS']  
+    base_n = app.config['BASE_N']  
+    bm25_n = app.config['BM25_N']  
+    max_iter = app.config['MAX_ITER']  
+    rerankers = app.config['RERANKERS']  
+    add_hybrid_search = app.config['ADD_HYBRID_SEARCH']  
+    multiple_query_llm = app.config['MULTIPLE_QUERY_LLM']  
+    base_weight = app.config['BASE_WEIGHT']  
+    metadata_positions = app.config['METADATA_POSITIONS']  
+    metrics = app.config['METRICS']  
+    verbose = app.config['VERBOSE']  
+    temperature = app.config['TEMPERATURE']  
+    chat_models = app.config['CHAT_MODELS']  
+    tr_models = app.config['TR_MODELS']  
+    response = app.config['RESPONSE']  
+    ref_template = app.config['REF_TEMPLATE']  
+    targets = app.config['TARGETS']  
+    c_prompt = app.config['C_PROMPT']  
+    e_prompt = app.config['E_PROMPT']  
+    QUERY_PROMPT = app.config['QUERY_PROMPT']  
+    SEARCH_PROMPT = app.config['SEARCH_PROMPT']  
+    DECISION_PROMPT = app.config['DECISION_PROMPT']  
+    max_retries = app.config['MAX_RETRIES']  
+    metadata = app.config['METADATA']  
     
     print("Entering chat thread")
     
@@ -579,36 +613,36 @@ def chat_generator():
     
 def log_generator():
     
-    # initialize some hyperparameters
-    global query
-    global chunk_sizes
-    global embedding_ids
-    global base_n
-    global bm25_n
-    global max_iter
-    global rerankers
-    global add_hybrid_search
-    global multiple_query_llm
-    global base_weight
-    global metadata_positions
-    global metrics
-    global targets
-    global verbose
-    global temperature
-    global chat_models
-    global tr_models
-    global response
-    global ref_template
-    global logs
-    global n_logs
-    global result_offset
-    global log_offset
-    global c_prompt
-    global e_prompt
-    global QUERY_PROMPT
-    global SEARCH_PROMPT
-    global DECISION_PROMPT
-    global max_retries
+    # Retrieve hyperparameters from app.config  
+    query = app.config['QUERY']  
+    chunk_sizes = app.config['CHUNK_SIZES']  
+    embedding_ids = app.config['EMBEDDING_IDS']  
+    base_n = app.config['BASE_N']  
+    bm25_n = app.config['BM25_N']  
+    max_iter = app.config['MAX_ITER']  
+    rerankers = app.config['RERANKERS']  
+    add_hybrid_search = app.config['ADD_HYBRID_SEARCH']  
+    multiple_query_llm = app.config['MULTIPLE_QUERY_LLM']  
+    base_weight = app.config['BASE_WEIGHT']  
+    metadata_positions = app.config['METADATA_POSITIONS']  
+    metrics = app.config['METRICS']  
+    targets = app.config['TARGETS']  
+    verbose = app.config['VERBOSE']  
+    temperature = app.config['TEMPERATURE']  
+    chat_models = app.config['CHAT_MODELS']  
+    tr_models = app.config['TR_MODELS']  
+    response = app.config['RESPONSE']  
+    ref_template = app.config['REF_TEMPLATE']  
+    logs = app.config['LOGS']  
+    n_logs = app.config['N_LOGS']  
+    result_offset = app.config['RESULT_OFFSET']  
+    log_offset = app.config['LOG_OFFSET']  
+    c_prompt = app.config['C_PROMPT']  
+    e_prompt = app.config['E_PROMPT']  
+    QUERY_PROMPT = app.config['QUERY_PROMPT']  
+    SEARCH_PROMPT = app.config['SEARCH_PROMPT']  
+    DECISION_PROMPT = app.config['DECISION_PROMPT']  
+    max_retries = app.config['MAX_RETRIES']  
     
     logs["results"] = []
     
@@ -742,32 +776,32 @@ def stream_agent():
 @server.route("/rag_system/")
 def rag_system():
     
-    # initialize some hyperparameters
-    global logs
-    global query
-    global chunk_sizes
-    global embedding_ids
-    global base_n
-    global bm25_n
-    global rerankers
-    global add_hybrid_search
-    global multiple_query_llm
-    global base_weight
-    global metadata_positions
-    global metrics
-    global verbose
-    global temperature
-    global chat_models
-    global response
-    global targets
-    global ref_template
-    global articles
-    global c_prompt
-    global e_prompt
-    global QUERY_PROMPT
-    global load
-    global max_retries
-    global metadata
+    # Retrieve hyperparameters from app.config  
+    logs = app.config['LOGS']  
+    query = app.config['QUERY']  
+    chunk_sizes = app.config['CHUNK_SIZES']  
+    embedding_ids = app.config['EMBEDDING_IDS']  
+    base_n = app.config['BASE_N']  
+    bm25_n = app.config['BM25_N']  
+    rerankers = app.config['RERANKERS']  
+    add_hybrid_search = app.config['ADD_HYBRID_SEARCH']  
+    multiple_query_llm = app.config['MULTIPLE_QUERY_LLM']  
+    base_weight = app.config['BASE_WEIGHT']  
+    metadata_positions = app.config['METADATA_POSITIONS']  
+    metrics = app.config['METRICS']  
+    verbose = app.config['VERBOSE']  
+    temperature = app.config['TEMPERATURE']  
+    chat_models = app.config['CHAT_MODELS']  
+    response = app.config['RESPONSE']  
+    targets = app.config['TARGETS']  
+    ref_template = app.config['REF_TEMPLATE']  # Added reference template  
+    articles = app.config['ARTICLES']  
+    c_prompt = app.config['C_PROMPT']  
+    e_prompt = app.config['E_PROMPT']  
+    QUERY_PROMPT = app.config['QUERY_PROMPT']  
+    load = app.config['LOAD']  
+    max_retries = app.config['MAX_RETRIES']  
+    metadata = app.config['METADATA']  
     
     # copy metadata dataframe
     articles_ = articles.copy()
@@ -918,10 +952,12 @@ def rag_system():
                     'code': code
                 }
                 
+                app.config['METADATA'] = metadata
+                
                 uniques = mix.get_metadata_as_dict(articles_)
                 
                 llm_query_rewriter_ = agent.get_query_rewriter(
-                    ChatMistralAI(model="open-mistral-7b"), QUERY_PROMPT
+                    ChatMistralAI(model="open-mistral-nemo"), QUERY_PROMPT
                 )
                 
                 try:
@@ -941,14 +977,17 @@ def rag_system():
 
                     contexts = [doc.page_content for doc in docs]
                     
+                    # print
+                    
                     chat_llm = ChatGroq(model=chat_models["sel"].replace("(groq)", "").strip(), temperature=temperature) if "groq" in chat_models["sel"]\
                         else ChatMistralAI(model=chat_models["sel"].replace("(mistral)", "").strip(), temperature=temperature)
                     
+                    # print("here1")
                     # sending the query to the RAG system
                     response = rag.get_answer(
                         chat_llm,
                         query,
-                        documents,
+                        docs,
                         targets["sel"],
                         c_prompt,
                         e_prompt,
@@ -969,6 +1008,32 @@ def rag_system():
                 uniques = mix.get_metadata_as_dict(articles_)
                 
                 response = "You must write a query to get an answer from the system !"
+            
+            # Assigning back to app.config if necessary  
+            app.config['LOGS'] = logs  
+            app.config['QUERY'] = query  
+            app.config['CHUNK_SIZES'] = chunk_sizes  
+            app.config['EMBEDDING_IDS'] = embedding_ids  
+            app.config['BASE_N'] = base_n  
+            app.config['BM25_N'] = bm25_n  
+            app.config['RERANKERS'] = rerankers  
+            app.config['ADD_HYBRID_SEARCH'] = add_hybrid_search  
+            app.config['MULTIPLE_QUERY_LLM'] = multiple_query_llm  
+            app.config['BASE_WEIGHT'] = base_weight  
+            app.config['METADATA_POSITIONS'] = metadata_positions  
+            app.config['METRICS'] = metrics  
+            app.config['VERBOSE'] = verbose  
+            app.config['TEMPERATURE'] = temperature  
+            app.config['CHAT_MODELS'] = chat_models  
+            app.config['RESPONSE'] = response  
+            app.config['TARGETS'] = targets 
+            app.config['REF_TEMPLATE'] = ref_template  # Ensure to include reference template  
+            app.config['ARTICLES'] = articles 
+            app.config['C_PROMPT'] = c_prompt  
+            app.config['E_PROMPT'] = e_prompt  
+            app.config['QUERY_PROMPT'] = QUERY_PROMPT  
+            app.config['LOAD'] = load  
+            app.config['MAX_RETRIES'] = max_retries  
             
             return jsonify({"title": "Answer from the RAG system", "response":substitute_strong(response.replace('\n', '<br>')),
                             "context": [text.replace('\n', '<br>') for text in contexts], "query": query, 
@@ -1002,35 +1067,35 @@ def rag_system():
 @server.route("/agent_system/")
 def agent_system():
     
-    # initialize some hyperparameters
-    global articles
-    global query
-    global logs
-    global chunk_sizes
-    global embedding_ids
-    global base_n
-    global bm25_n
-    global max_iter
-    global rerankers
-    global add_hybrid_search
-    global multiple_query_llm
-    global base_weight
-    global metadata_positions
-    global metrics
-    global verbose
-    global targets
-    global temperature
-    global chat_models
-    global tr_models
-    global response
-    global c_prompt
-    global e_prompt
-    global QUERY_PROMPT
-    global SEARCH_PROMPT
-    global DECISION_PROMPT
-    global load
-    global max_retries
-    global metadata
+    # Retrieve hyperparameters
+    articles = app.config['ARTICLES']
+    query = app.config['QUERY']
+    logs = app.config['LOGS']
+    chunk_sizes = app.config['CHUNK_SIZES']
+    embedding_ids = app.config['EMBEDDING_IDS']
+    base_n = app.config['BASE_N']
+    bm25_n = app.config['BM25_N']
+    max_iter = app.config['MAX_ITER']
+    rerankers = app.config['RERANKERS']
+    add_hybrid_search = app.config['ADD_HYBRID_SEARCH']
+    multiple_query_llm = app.config['MULTIPLE_QUERY_LLM']
+    base_weight = app.config['BASE_WEIGHT']
+    metadata_positions = app.config['METADATA_POSITIONS']
+    metrics = app.config['METRICS']
+    verbose = app.config['VERBOSE']
+    targets = app.config['TARGETS']
+    temperature = app.config['TEMPERATURE']
+    chat_models = app.config['CHAT_MODELS']
+    tr_models = app.config['TR_MODELS']
+    response = app.config['RESPONSE']
+    c_prompt = app.config['C_PROMPT']
+    e_prompt = app.config['E_PROMPT']
+    QUERY_PROMPT = app.config['QUERY_PROMPT']
+    SEARCH_PROMPT = app.config['SEARCH_PROMPT']
+    DECISION_PROMPT = app.config['DECISION_PROMPT']
+    load = app.config['LOAD']
+    max_retries = app.config['MAX_RETRIES']
+    metadata = app.config['METADATA']
      
     # recuperate data for selection
     articles_ = articles.copy()
@@ -1134,7 +1199,9 @@ def agent_system():
                 
                 DECISION_PROMPT = request.form.get('d_prompt')
             
-            except:
+            except Exception as e:
+                
+                print(e)
                 
                 pass
             
@@ -1202,6 +1269,36 @@ def agent_system():
                 response = "You must write a query to get an answer from the system !"
 
                 correct = False
+            
+            # Assigning back to app.config
+            app.config['ARTICLES'] = articles
+            app.config['QUERY'] = query
+            app.config['LOGS'] = logs
+            app.config['CHUNK_SIZES'] = chunk_sizes
+            app.config['EMBEDDING_IDS'] = embedding_ids
+            app.config['BASE_N'] = base_n
+            app.config['BM25_N'] = bm25_n
+            app.config['MAX_ITER'] = max_iter
+            app.config['RERANKERS'] = rerankers
+            app.config['ADD_HYBRID_SEARCH'] = add_hybrid_search
+            app.config['MULTIPLE_QUERY_LLM'] = multiple_query_llm
+            app.config['BASE_WEIGHT'] = base_weight
+            app.config['METADATA_POSITIONS'] = metadata_positions
+            app.config['METRICS'] = metrics
+            app.config['VERBOSE'] = verbose
+            app.config['TARGETS'] = targets
+            app.config['TEMPERATURE'] = temperature
+            app.config['CHAT_MODELS'] = chat_models
+            app.config['TR_MODELS'] = tr_models
+            app.config['RESPONSE'] = response
+            app.config['C_PROMPT'] = c_prompt
+            app.config['E_PROMPT'] = e_prompt
+            app.config['QUERY_PROMPT'] = QUERY_PROMPT
+            app.config['SEARCH_PROMPT'] = SEARCH_PROMPT
+            app.config['DECISION_PROMPT'] = DECISION_PROMPT
+            app.config['LOAD'] = load
+            app.config['MAX_RETRIES'] = max_retries
+            app.config['METADATA'] = metadata
             
             return jsonify(
                     {

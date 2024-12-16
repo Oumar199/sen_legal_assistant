@@ -26,7 +26,9 @@ def execute_with_count(max_count, task):
                     
                     return value
                 
-                except:
+                except Exception as e:
+                    
+                    print(e)
                     
                     if count > max_count:
                         
@@ -245,6 +247,8 @@ def get_document_extractor(db, n=4, threshold=0.3, metadata={}):
     search_kwargs = {"k": n, "score_threshold": threshold}
 
     if len(metadata) != 0: search_kwargs["filter"]= metadata
+    
+    print(search_kwargs)
 
     retriever = db.as_retriever(
         search_type="similarity_score_threshold",
