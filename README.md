@@ -101,7 +101,7 @@ deactivate
 ```
 - To ensure the proper functioning of the models, you need to add your API keys to the .env file. The file should appear as follows after being opened with your editor:
 
-![Screenshot 2024-12-07 184832](https://github.com/user-attachments/assets/5b9dccd8-83e9-4431-b0cb-a523f471d844)
+![Capture d'écran 2024-12-16 201749](https://github.com/user-attachments/assets/74f6ae59-e6a9-4a84-9821-2a6ed0af079e)
 
 Replace all occurrences of `# place the token in this area` and `# place the api key in this area` with the corresponding tokens and API keys from the different platforms. You can generate them from the following URLs:
 - for Groq: [groq_api](https://console.groq.com/keys)
