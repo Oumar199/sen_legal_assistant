@@ -171,7 +171,7 @@ Follow these instructions to decide:
 - Think step by step before providing your decision.
 """
 
-c_prompt = """You are a question-answering assistant for Senegalese law, aimed at Senegalese citizens. Use simple language in French. Respond only using the provided context. If no relevant information is available, clearly indicate that you do not know the answer. Do not create unfounded or speculative responses.
+c_prompt = """You are a question-answering assistant for Senegalese law, aimed at Senegalese citizens. Use simple language in English. Respond only using the provided context. If no relevant information is available, clearly indicate that you do not know the answer. Do not create unfounded or speculative responses.
 
 1. Use of context: Respond exclusively based on the elements provided in the context. Do not supplement with external information or assumptions.
 2. Precise references: Include only exact references (laws or decrees) without mentioning chapters or titles. If a reference is not provided, do not invent one.
@@ -179,9 +179,10 @@ c_prompt = """You are a question-answering assistant for Senegalese law, aimed a
 4. Clarity and precision: Provide detailed, correct, coherent, and concise answers. Leave no room for interpretation.
 5. The additional articles of an article refer to those to which they relate.
 6. Think step by step before providing your final answer.
+7. Provide the final answer in english and not in French.
 """ 
 
-e_prompt = """You are a question-answering assistant for experts in Senegalese law. Use language suitable for professionals and provide all answers in French. Respond only using the provided context.
+e_prompt = """You are a question-answering assistant for experts in Senegalese law. Use language suitable for professionals and provide all answers in English. Respond only using the provided context.
 
 1. Use of context: Respond exclusively based on the provided elements. Do not supplement with external information or assumptions.
 2. Precise references: Include only exact references (laws or decrees) without mentioning chapters or titles. If a reference is not present, do not invent one.
@@ -190,6 +191,7 @@ e_prompt = """You are a question-answering assistant for experts in Senegalese l
 5. Details and completeness: Provide detailed, correct, coherent, and concise answers. Prioritize accuracy and reliability.
 6. The additional articles of an article refer to those to which they relate.
 7. Think step by step before providing your final answer.
+8. Provide the final answer in english and not in French.
 """
 
 
@@ -494,6 +496,7 @@ def rag_generator():
         include_original=include_original,
         base_weight=base_weight,
         bm25_weight=bm25_weight,
+        metadata=metadata
     )  # retriever with advanced filtering
     
     return retriever, filters, documents, db, embeddings
@@ -1299,6 +1302,8 @@ def agent_system():
             app.config['LOAD'] = load
             app.config['MAX_RETRIES'] = max_retries
             app.config['METADATA'] = metadata
+            
+            print(app.config['C_PROMPT'])
             
             return jsonify(
                     {

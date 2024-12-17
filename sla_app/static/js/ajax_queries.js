@@ -496,7 +496,7 @@ $(document).ready(function() {
             bm25_n: $('form input[name="bm25_n"]').val(),
             max_iter: $('form input[name="max_iter"]').val(),
             max_retries: $('form input[name="max_retries"]').val(),
-            chat_model: $('form select[name="target"]').val(),
+            target: $('form select[name="target"]').val(),
             chat_model: $('form select[name="chat_model"]').val(),
             tr_model: $('form select[name="tr_model"]').val(),
             embedding_id: $('form select[name="embedding_id"]').val(),

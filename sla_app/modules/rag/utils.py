@@ -247,8 +247,6 @@ def get_document_extractor(db, n=4, threshold=0.3, metadata={}):
     search_kwargs = {"k": n, "score_threshold": threshold}
 
     if len(metadata) != 0: search_kwargs["filter"]= metadata
-    
-    print(search_kwargs)
 
     retriever = db.as_retriever(
         search_type="similarity_score_threshold",
@@ -335,6 +333,7 @@ def get_base_retriever_and_filters(
     include_original=True,
     bm25_weight=0.7,
     base_weight=0.3,
+    metadata={},
 ):
 
     llm = filter_llm
@@ -351,6 +350,8 @@ def get_base_retriever_and_filters(
         bm25_retriever = BM25Retriever.from_documents(documents)
 
         bm25_retriever.k = n
+        
+        if len(metadata) != 0: bm25_retriever.metadata = metadata
 
         # reciprocal rank fusion
         base_retriever = EnsembleRetriever(
